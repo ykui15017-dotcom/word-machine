@@ -5,5 +5,6 @@ import { actions } from './actions.js'; import { states } from './states.js';
 import { relations } from './relations.js'; import { scale } from './scale.js';
 import { visual } from './visual.js'; import { concepts } from './concepts.js';
 import { details } from './details.js'; import { observations } from './observations.js';
-export const BASE_WORDS=[...objects,...containers,...spaces,...living,...organic,...materials,...actions,...states,...relations,...scale,...visual,...concepts,...details,...observations];
+import { expandedWords } from './expanded.js';
+export const BASE_WORDS=[...objects,...containers,...spaces,...living,...organic,...materials,...actions,...states,...relations,...scale,...visual,...concepts,...details,...observations,...expandedWords];
 export const CATEGORIES=['object','container','space','living','organic','material','action','state','relation','scale','visual','concept','detail','observation'];
