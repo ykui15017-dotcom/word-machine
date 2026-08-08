@@ -1,0 +1,13 @@
+const KEYS={words:'wm-my-words-v1',saved:'wm-saved-v1',machine:'wm-machine-v1'};
+const read=(key,fallback=[])=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
+const write=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
+export const getMyWords=()=>read(KEYS.words);
+export const addMyWord=word=>{const words=getMyWords();words.unshift(word);write(KEYS.words,words);return words};
+export const removeMyWord=id=>write(KEYS.words,getMyWords().filter(w=>w.id!==id));
+export const getSaved=()=>read(KEYS.saved);
+export const saveDrop=drop=>{const saved=getSaved();saved.unshift({...drop,id:`saved_${Date.now()}`,savedAt:new Date().toISOString()});write(KEYS.saved,saved);return saved};
+export const removeSaved=id=>write(KEYS.saved,getSaved().filter(x=>x.id!==id));
+export const getMachineState=()=>read(KEYS.machine,null);
+export const setMachineState=state=>write(KEYS.machine,state);
+export const putOnMachine=word=>{sessionStorage.setItem('wm-incoming',JSON.stringify(word));location.href='./index.html'};
+export const takeIncoming=()=>{try{const x=JSON.parse(sessionStorage.getItem('wm-incoming'));sessionStorage.removeItem('wm-incoming');return x}catch{return null}};
