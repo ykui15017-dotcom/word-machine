@@ -1,0 +1,14 @@
+<svg viewBox="0 0 420 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="mt md">
+<title id="mt">复古视觉灵感扭蛋机</title><desc id="md">玻璃仓中装着雾蓝、浅黄、砖红和绿色小球的二维插画机器</desc>
+<g fill="none" stroke="#30302c" stroke-width="4" stroke-linejoin="round">
+ <path fill="#e9f0f1" fill-opacity=".55" d="M93 193C91 95 139 32 211 31c76-1 121 63 119 164z"/>
+ <g class="svg-balls" stroke-width="2.5">
+  <circle fill="#afc7d8" cx="132" cy="148" r="31"/><circle fill="#f0d98a" cx="185" cy="117" r="29"/><circle fill="#b65c4a" cx="239" cy="140" r="32"/><circle fill="#aab8a0" cx="289" cy="103" r="27"/>
+  <circle fill="#f0d98a" cx="112" cy="188" r="27"/><circle fill="#aab8a0" cx="168" cy="174" r="32"/><circle fill="#afc7d8" cx="220" cy="188" r="28"/><circle fill="#f0d98a" cx="277" cy="177" r="34"/><circle fill="#b65c4a" cx="318" cy="156" r="23"/>
+ </g>
+ <path fill="#f3f0e7" d="M79 194l264 2-23 251-222-1z"/><path fill="#e7e1d2" d="M101 448l217 1 25 42H77z"/>
+ <path fill="#faf9f5" d="M159 349q49-18 101 0l-7 63h-87z"/><path d="M176 374h68"/>
+ <circle class="knob-outer" fill="#f6f1e7" cx="210" cy="275" r="65"/><circle class="knob" fill="#b65c4a" cx="210" cy="275" r="44"/><path stroke="#faf9f5" d="M210 247v31l18 9"/>
+ <path d="M106 214c62 8 138-9 209 3" stroke-width="2" opacity=".45"/>
+</g><path d="M122 75q15-21 38-25" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".75"/>
+</svg>

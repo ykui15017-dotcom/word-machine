@@ -1,0 +1,2 @@
+export function initNav(){const btn=document.querySelector('.menu-button'),nav=document.querySelector('.nav-links');btn?.addEventListener('click',()=>{const open=nav.classList.toggle('open');btn.setAttribute('aria-expanded',open)});document.querySelectorAll('.year').forEach(x=>x.textContent=new Date().getFullYear())}
+export const escapeHtml=s=>String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
