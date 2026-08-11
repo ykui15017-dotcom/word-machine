@@ -1,18 +1,63 @@
 import {BASE_WORDS} from '../data/words/index.js';
-import {RECIPES,resolveRecipe} from '../data/recipes.js';
+import {VISUAL_OPERATIONS,getOperation} from '../data/visual-operations.js';
 import {getMyWords} from './storage.js';
-import {normalizeWord,canFill,isPhysicalSubject} from './semantic-layer.js';
+import {normalizeWord,isPhysicalSubject} from './semantic-layer.js';
+import {composeScenePlan} from './scene-composer.js';
+import {validateScenePlan} from './scene-validator.js';
+
 const all=()=>[...BASE_WORDS,...getMyWords()].map(normalizeWord);
-const weighted=list=>{if(!list.length)return null;const total=list.reduce((n,w)=>n+(w.weight||1),0);let n=Math.random()*total;return list.find(w=>(n-=w.weight||1)<=0)||list[0]};
-const shuffle=list=>{const copy=[...list];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]]}return copy};
-const relationKinds={inside_relation:['漂浮','浸泡','塞满','悬挂','堆叠','下沉'],replacement_relation:['替代','缝合','嵌入','拼接','覆盖'],invasion_relation:['生长','蔓延','钻出','缠绕','渗出'],transfer_relation:['覆盖','投影','转印','附着','凝结'],scale_relation:['放大','扩张','重复','铺满'],mechanism:['发光','旋转','滴落','折叠','悬挂'],spatial_relation:['穿插','围绕','阻挡','连接','堆叠'],attachment_relation:['凝结','附着','覆盖','缠绕'],fill_relation:['塞满','堆叠','填充','铺满'],transformation_relation:['替代','包裹','覆盖','融化'],physical_relation:['贴合','穿插','悬挂','堆叠','包裹']};
-function candidates(slot,excluded=[],distance='odd',anchor=null){let list=all().filter(word=>!excluded.includes(word.id)&&canFill(word,slot)&&(slot.categories?.length?slot.categories.includes(word.category):true));if(slot.role==='subject')list=list.filter(isPhysicalSubject);if(slot.role==='relation'){const cues=relationKinds[slot.accepts.find(x=>x.endsWith('_relation')||x==='mechanism')]||[];const matched=list.filter(word=>cues.some(cue=>word.text.includes(cue)));if(matched.length)list=matched}if(anchor){if(distance==='near'){const same=list.filter(word=>word.domain===anchor.domain||word.domain==='unknown');if(same.length)list=same}else if(distance!=='near'){const different=list.filter(word=>word.domain!==anchor.domain);if(different.length)list=different}}return list}
-function compatibleRecipes(locked){return RECIPES.filter(recipe=>locked.every(word=>[...recipe.required,...recipe.optional].some(slot=>canFill(word,slot))))}
-function assignLocked(recipe,locked){const assigned=[],remaining=[...locked];for(const slot of [...recipe.required,...recipe.optional]){const index=remaining.findIndex(word=>canFill(word,slot)&&(slot.role!=='subject'||isPhysicalSubject(word)));if(index>=0)assigned.push({...normalizeWord(remaining.splice(index,1)[0]),role:slot.role,locked:true})}return {assigned,unassigned:remaining}}
-export function scoreDrop(drop){const subject=drop.words.find(w=>w.role==='subject'&&isPhysicalSubject(w)),anomaly=drop.words.find(w=>w.role==='anomaly'),relation=drop.words.find(w=>w.role==='relation'),anomalyEvidence=anomaly||drop.words.find(w=>['concept','scale'].includes(w.role));let score=(subject?2:-5)+(anomalyEvidence?2:0)+(relation?2:-3);if(subject&&anomaly&&subject.domain!==anomaly.domain)score++;if(drop.words.some(w=>w.role==='space'))score++;if(drop.words.some(w=>['visual','detail'].includes(w.role)))score++;if(drop.words.every(w=>w.abstraction>.7))score-=4;if(drop.words.some(w=>w.role==='subject'&&!isPhysicalSubject(w)))score-=3;return score}
-export function validateDrop(drop){const missing=drop.recipe.required.filter(slot=>!drop.words.some(word=>word.role===slot.role&&canFill(word,slot)));const ids=drop.words.map(w=>w.id);return {valid:!missing.length&&drop.words.some(w=>w.role==='subject'&&isPhysicalSubject(w))&&ids.length===new Set(ids).size&&scoreDrop(drop)>=5,missing,score:scoreDrop(drop)}}
-function build(recipe,locked,distance,optionalCount){const {assigned}=assignLocked(recipe,locked),words=[...assigned],anchor=words.find(w=>w.role==='subject');for(const slot of recipe.required){if(words.some(w=>w.role===slot.role))continue;const word=weighted(candidates(slot,words.map(w=>w.id),distance,anchor));if(word)words.push({...word,role:slot.role,locked:false});}for(const slot of shuffle(recipe.optional).slice(0,optionalCount)){if(words.some(w=>w.role===slot.role))continue;const word=weighted(candidates(slot,words.map(w=>w.id),distance,words.find(w=>w.role==='subject')));if(word)words.push({...word,role:slot.role,locked:false})}return {recipe,words,distance}}
-export function newDrop(count=4,locked=[],preferredRecipe=null,distance='odd'){const compatible=compatibleRecipes(locked);let recipe=preferredRecipe?resolveRecipe(preferredRecipe.id||preferredRecipe):weighted(compatible.length?compatible:RECIPES);if(locked.length&&!compatible.includes(recipe))recipe=weighted(compatible.length?compatible:RECIPES);const requested=Math.max(0,count-recipe.required.length),optionalCount=distance==='near'?Math.min(1,requested):distance==='wild'?Math.min(recipe.optional.length,requested+1):Math.min(recipe.optional.length,requested);for(let retry=0;retry<12;retry++){const drop=build(recipe,locked,distance,optionalCount);if(validateDrop(drop).valid)return drop}return build(resolveRecipe('wrong_contents'),locked.filter(w=>canFill(w,resolveRecipe('wrong_contents').required[0])),distance,0)}
-export function replaceUnlocked(current,recipe,distance='odd'){return newDrop(current.length,current.filter(w=>w.locked),resolveRecipe(recipe?.id),distance)}
-export function addWord(current,recipe,distance='odd'){if(current.length>=5)return {recipe:resolveRecipe(recipe?.id),words:current,distance};const resolved=resolveRecipe(recipe?.id),used=current.map(w=>w.role);const slot=shuffle(resolved.optional.filter(item=>!used.includes(item.role)))[0];if(!slot)return {recipe:resolved,words:current,distance};const word=weighted(candidates(slot,current.map(w=>w.id),distance,current.find(w=>w.role==='subject')));return word?{recipe:resolved,words:[...current,{...word,role:slot.role,locked:false}],distance}:{recipe:resolved,words:current,distance}}
-export function removeOptional(current,recipe){const required=new Set(resolveRecipe(recipe?.id).required.map(s=>s.role));const index=[...current].map((word,i)=>({word,i})).reverse().find(x=>!x.word.locked&&!required.has(x.word.role))?.i;return index===undefined?current:[...current.slice(0,index),...current.slice(index+1)]}
+const pick=list=>list.length?list[Math.floor(Math.random()*list.length)]:null;
+const unique=words=>[...new Map(words.filter(Boolean).map(w=>[w.id,w])).values()];
+const candidates=(categories,excluded=[])=>all().filter(w=>categories.includes(w.category)&&!excluded.includes(w.id));
+const optionalCategories={space:['space'],visual:['visual'],detail:['detail','observation'],scale:['scale'],quantity:['scale'],rule:['concept']};
+const roleForLocked=word=>word.category==='space'?'space':word.category==='visual'?'visual':word.category==='scale'?'scale':word.category==='concept'?'rule':word.category==='observation'?'source':isPhysicalSubject(word)?'subject':'detail';
+const acceptsLocked=(op,word)=>op.subjects.includes(word.category)||op.sources.includes(word.category)||op.optional.some(role=>(optionalCategories[role]||[]).includes(word.category));
+const compatibleOperations=locked=>VISUAL_OPERATIONS.filter(op=>locked.every(word=>acceptsLocked(op,normalizeWord(word))));
+function assign(operation,locked=[]){
+  const words=unique(locked.map(normalizeWord)).map(word=>({...word,sceneRole:roleForLocked(word),locked:true}));
+  const subjectLocked=words.find(w=>w.sceneRole==='subject'&&operation.subjects.includes(w.category));if(subjectLocked)subjectLocked.sceneRole='subject';
+  else {const misplaced=words.find(w=>operation.subjects.includes(w.category));if(misplaced)misplaced.sceneRole='subject';}
+  const sourceLocked=words.find(w=>w.sceneRole==='source'&&operation.sources.includes(w.category))||words.find(w=>w.sceneRole!=='subject'&&operation.sources.includes(w.category));if(sourceLocked)sourceLocked.sceneRole='source';
+  const ids=()=>words.map(w=>w.id);
+  if(!words.some(w=>w.sceneRole==='subject'))words.push({...pick(candidates(operation.subjects,ids())),sceneRole:'subject',locked:false});
+  if(!words.some(w=>w.sceneRole==='source'))words.push({...pick(candidates(operation.sources,ids())),sceneRole:'source',locked:false});
+  return words.filter(w=>w.id);
+}
+function addOptionals(words,operation,mode,count){
+  const desired=mode==='near'?Math.min(1,count):mode==='wild'?Math.min(4,count):Math.min(2,count);
+  const priority=mode==='wild'?['space','scale','detail','visual']:['space','visual','detail','scale'];
+  for(const role of priority){if(words.length>=2+desired)break;if(words.some(w=>w.sceneRole===role))continue;const word=pick(candidates(optionalCategories[role]||[],words.map(w=>w.id)));if(word)words.push({...word,sceneRole:role,locked:false})}
+  return words;
+}
+export function newDrop(count=4,locked=[],preferredOperation=null,mode='odd'){
+  const normalizedLocks=unique(locked.map(normalizeWord));let pool=compatibleOperations(normalizedLocks);
+  if(mode==='near')pool=pool.filter(op=>op.near);
+  let operation=preferredOperation?getOperation(preferredOperation.id||preferredOperation):pick(pool.length?pool:VISUAL_OPERATIONS);
+  if(normalizedLocks.length&&!pool.includes(operation))operation=pick(pool.length?pool:VISUAL_OPERATIONS);
+  let last;
+  for(let retry=0;retry<10;retry++){
+    const words=addOptionals(assign(operation,normalizedLocks),operation,mode,Math.max(0,count-2));
+    const secondary=mode==='wild'&&words.some(w=>w.sceneRole==='detail')?'SURFACE_TRANSFER':null;
+    const scenePlan=composeScenePlan({operation:operation.id,words,mode,secondaryOperation:secondary,retryCount:retry});
+    last={operation,recipe:operation,recipeId:operation.id,words,scenePlan,distance:mode,retries:retry};if(scenePlan.validation.valid)return last;
+  }
+  return last;
+}
+export function replaceUnlocked(current,operation,mode='odd'){return newDrop(current.length,current.filter(w=>w.locked),operation,mode)}
+export function addWord(current,operation,mode='odd'){
+  const op=getOperation(operation?.id||operation),roles=['space','visual','detail','scale'];const missing=roles.find(role=>!current.some(w=>w.sceneRole===role)&&op.optional.includes(role));if(!missing)return hydrate(current,op,mode);
+  const word=pick(candidates(optionalCategories[missing],current.map(w=>w.id)));return hydrate(word?[...current,{...word,sceneRole:missing,locked:false}]:current,op,mode);
+}
+const hydrate=(words,operation,mode)=>{const secondary=mode==='wild'&&words.some(w=>w.sceneRole==='detail')?'SURFACE_TRANSFER':null;return {operation,recipe:operation,recipeId:operation.id,words,scenePlan:composeScenePlan({operation:operation.id,words,mode,secondaryOperation:secondary}),distance:mode}};
+export function removeOptional(current,operation,mode='odd'){const i=[...current].map((word,i)=>({word,i})).reverse().find(x=>!x.word.locked&&!['subject','source'].includes(x.word.sceneRole))?.i;return hydrate(i===undefined?current:[...current.slice(0,i),...current.slice(i+1)],getOperation(operation?.id||operation),mode)}
+export function validateDrop(drop){const validation=drop.scenePlan?validateScenePlan(drop.scenePlan):{valid:false,errors:['missing_scene_plan']};return {...validation,score:validation.valid?10:0}}
+
+export function composeFixture(operation,ingredients,mode='odd'){
+  const op=getOperation(operation),words=ingredients.map(normalizeWord);const assigned=[];
+  const take=(predicate,sceneRole)=>{const word=words.find(w=>!assigned.includes(w)&&predicate(w));if(word){word.sceneRole=sceneRole;assigned.push(word)}return word};
+  if(operation==='OBSERVATION_MAGNIFY')take(w=>w.category==='space'||isPhysicalSubject(w),'subject');else take(w=>op.subjects.includes(w.category),'subject');
+  take(w=>op.sources.includes(w.category),'source');
+  for(const role of ['space','scale','visual','detail','rule'])take(w=>!['subject','source'].includes(w.sceneRole)&&(optionalCategories[role]||[]).includes(w.category),role);
+  for(const word of words.filter(w=>!assigned.includes(w))){word.sceneRole=word.category==='concept'?'rule':word.category==='observation'?'detail':'detail';assigned.push(word)}
+  const secondary=mode==='wild'&&assigned.some(w=>w.sceneRole==='detail')?'SURFACE_TRANSFER':null;return composeScenePlan({operation,words:assigned,mode,secondaryOperation:secondary});
+}
