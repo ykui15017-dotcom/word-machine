@@ -1,4 +1,4 @@
-const KEYS={words:'wm-my-words-v1',saved:'wm-saved-v1',machine:'wm-machine-v1'};
+const KEYS={words:'wm-my-words-v1',saved:'wm-saved-v1',machine:'wm-machine-v1',ingredients:'wm-ingredients-v3'};
 const read=(key,fallback=[])=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const write=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
 export const getMyWords=()=>read(KEYS.words);
@@ -9,5 +9,10 @@ export const saveDrop=drop=>{const saved=getSaved();saved.unshift({...drop,id:`s
 export const removeSaved=id=>write(KEYS.saved,getSaved().filter(x=>x.id!==id));
 export const getMachineState=()=>read(KEYS.machine,null);
 export const setMachineState=state=>write(KEYS.machine,state);
+export const getIngredients=()=>read(KEYS.ingredients);
+export const setIngredients=ingredients=>write(KEYS.ingredients,ingredients);
+export const addIngredient=word=>{const ingredients=getIngredients();if(!ingredients.some(item=>item.id===word.id))ingredients.push(word);setIngredients(ingredients);return ingredients};
+export const removeIngredient=id=>{const ingredients=getIngredients().filter(item=>item.id!==id);setIngredients(ingredients);return ingredients};
+export const clearIngredients=()=>setIngredients([]);
 export const putOnMachine=word=>{sessionStorage.setItem('wm-incoming',JSON.stringify(word));location.href='./index.html'};
 export const takeIncoming=()=>{try{const x=JSON.parse(sessionStorage.getItem('wm-incoming'));sessionStorage.removeItem('wm-incoming');return x}catch{return null}};
