@@ -1,44 +1,18 @@
 import {BASE_WORDS} from '../data/words/index.js';
-import {RECIPES} from '../data/recipes.js';
+import {RECIPES,resolveRecipe} from '../data/recipes.js';
 import {getMyWords} from './storage.js';
-
-const all=()=>[...BASE_WORDS,...getMyWords()];
-const weighted=list=>{const total=list.reduce((n,w)=>n+(w.weight||1),0);let n=Math.random()*total;return list.find(w=>(n-=w.weight||1)<=0)||list[0]};
+import {normalizeWord,canFill,isPhysicalSubject} from './semantic-layer.js';
+const all=()=>[...BASE_WORDS,...getMyWords()].map(normalizeWord);
+const weighted=list=>{if(!list.length)return null;const total=list.reduce((n,w)=>n+(w.weight||1),0);let n=Math.random()*total;return list.find(w=>(n-=w.weight||1)<=0)||list[0]};
 const shuffle=list=>{const copy=[...list];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]]}return copy};
-const pick=(category,excluded=[])=>weighted(all().filter(w=>w.category===category&&!excluded.includes(w.id)));
-const chooseRecipe=list=>weighted(list.map(recipe=>({...recipe,weight:recipe.weight||1})));
-
-function categoriesFor(recipe,count,locked){
-  const used=locked.map(word=>word.category);
-  const remainingCore=shuffle((recipe.coreSlots||[]).filter(category=>!used.includes(category)));
-  const optional=shuffle((recipe.optionalSlots||recipe.slots).filter(category=>!used.includes(category)&&!remainingCore.includes(category)));
-  const categories=[...remainingCore];
-  // Pick optional categories at random rather than truncating the recipe's head.
-  while(categories.length<count-locked.length&&optional.length)categories.push(optional.shift());
-  const fallback=shuffle(recipe.slots);
-  while(categories.length<count-locked.length)categories.push(fallback[categories.length%fallback.length]);
-  return shuffle(categories);
-}
-
-export function newDrop(count=4,locked=[],preferredRecipe=null){
-  const compatible=RECIPES.filter(recipe=>locked.every(word=>recipe.slots.includes(word.category)));
-  const recipe=preferredRecipe&&compatible.some(item=>item.id===preferredRecipe.id)?preferredRecipe:chooseRecipe(compatible.length?compatible:RECIPES);
-  const kept=locked.slice(0,count), result=[...kept];
-  for(const category of categoriesFor(recipe,count,kept)){
-    const word=pick(category,result.map(item=>item.id));
-    if(word)result.push({...word,locked:false});
-  }
-  return {recipe,words:result.slice(0,count)};
-}
-
-export function replaceUnlocked(current,recipe){
-  const excluded=current.map(item=>item.id);
-  return {recipe,words:current.map(word=>word.locked?word:{...pick(word.category,excluded),locked:false})};
-}
-
-export function addWord(current,recipe){
-  if(current.length>=5)return {recipe,words:current};
-  const available=shuffle(recipe.slots.filter(category=>!current.some(word=>word.category===category)));
-  const category=available[0]||shuffle(recipe.slots)[0];
-  return {recipe,words:[...current,{...pick(category,current.map(item=>item.id)),locked:false}]};
-}
+const relationKinds={inside_relation:['漂浮','浸泡','塞满','悬挂','堆叠','下沉'],replacement_relation:['替代','缝合','嵌入','拼接','覆盖'],invasion_relation:['生长','蔓延','钻出','缠绕','渗出'],transfer_relation:['覆盖','投影','转印','附着','凝结'],scale_relation:['放大','扩张','重复','铺满'],mechanism:['发光','旋转','滴落','折叠','悬挂'],spatial_relation:['穿插','围绕','阻挡','连接','堆叠'],attachment_relation:['凝结','附着','覆盖','缠绕'],fill_relation:['塞满','堆叠','填充','铺满'],transformation_relation:['替代','包裹','覆盖','融化'],physical_relation:['贴合','穿插','悬挂','堆叠','包裹']};
+function candidates(slot,excluded=[],distance='odd',anchor=null){let list=all().filter(word=>!excluded.includes(word.id)&&canFill(word,slot)&&(slot.categories?.length?slot.categories.includes(word.category):true));if(slot.role==='subject')list=list.filter(isPhysicalSubject);if(slot.role==='relation'){const cues=relationKinds[slot.accepts.find(x=>x.endsWith('_relation')||x==='mechanism')]||[];const matched=list.filter(word=>cues.some(cue=>word.text.includes(cue)));if(matched.length)list=matched}if(anchor){if(distance==='near'){const same=list.filter(word=>word.domain===anchor.domain||word.domain==='unknown');if(same.length)list=same}else if(distance!=='near'){const different=list.filter(word=>word.domain!==anchor.domain);if(different.length)list=different}}return list}
+function compatibleRecipes(locked){return RECIPES.filter(recipe=>locked.every(word=>[...recipe.required,...recipe.optional].some(slot=>canFill(word,slot))))}
+function assignLocked(recipe,locked){const assigned=[],remaining=[...locked];for(const slot of [...recipe.required,...recipe.optional]){const index=remaining.findIndex(word=>canFill(word,slot)&&(slot.role!=='subject'||isPhysicalSubject(word)));if(index>=0)assigned.push({...normalizeWord(remaining.splice(index,1)[0]),role:slot.role,locked:true})}return {assigned,unassigned:remaining}}
+export function scoreDrop(drop){const subject=drop.words.find(w=>w.role==='subject'&&isPhysicalSubject(w)),anomaly=drop.words.find(w=>w.role==='anomaly'),relation=drop.words.find(w=>w.role==='relation'),anomalyEvidence=anomaly||drop.words.find(w=>['concept','scale'].includes(w.role));let score=(subject?2:-5)+(anomalyEvidence?2:0)+(relation?2:-3);if(subject&&anomaly&&subject.domain!==anomaly.domain)score++;if(drop.words.some(w=>w.role==='space'))score++;if(drop.words.some(w=>['visual','detail'].includes(w.role)))score++;if(drop.words.every(w=>w.abstraction>.7))score-=4;if(drop.words.some(w=>w.role==='subject'&&!isPhysicalSubject(w)))score-=3;return score}
+export function validateDrop(drop){const missing=drop.recipe.required.filter(slot=>!drop.words.some(word=>word.role===slot.role&&canFill(word,slot)));const ids=drop.words.map(w=>w.id);return {valid:!missing.length&&drop.words.some(w=>w.role==='subject'&&isPhysicalSubject(w))&&ids.length===new Set(ids).size&&scoreDrop(drop)>=5,missing,score:scoreDrop(drop)}}
+function build(recipe,locked,distance,optionalCount){const {assigned}=assignLocked(recipe,locked),words=[...assigned],anchor=words.find(w=>w.role==='subject');for(const slot of recipe.required){if(words.some(w=>w.role===slot.role))continue;const word=weighted(candidates(slot,words.map(w=>w.id),distance,anchor));if(word)words.push({...word,role:slot.role,locked:false});}for(const slot of shuffle(recipe.optional).slice(0,optionalCount)){if(words.some(w=>w.role===slot.role))continue;const word=weighted(candidates(slot,words.map(w=>w.id),distance,words.find(w=>w.role==='subject')));if(word)words.push({...word,role:slot.role,locked:false})}return {recipe,words,distance}}
+export function newDrop(count=4,locked=[],preferredRecipe=null,distance='odd'){const compatible=compatibleRecipes(locked);let recipe=preferredRecipe?resolveRecipe(preferredRecipe.id||preferredRecipe):weighted(compatible.length?compatible:RECIPES);if(locked.length&&!compatible.includes(recipe))recipe=weighted(compatible.length?compatible:RECIPES);const requested=Math.max(0,count-recipe.required.length),optionalCount=distance==='near'?Math.min(1,requested):distance==='wild'?Math.min(recipe.optional.length,requested+1):Math.min(recipe.optional.length,requested);for(let retry=0;retry<12;retry++){const drop=build(recipe,locked,distance,optionalCount);if(validateDrop(drop).valid)return drop}return build(resolveRecipe('wrong_contents'),locked.filter(w=>canFill(w,resolveRecipe('wrong_contents').required[0])),distance,0)}
+export function replaceUnlocked(current,recipe,distance='odd'){return newDrop(current.length,current.filter(w=>w.locked),resolveRecipe(recipe?.id),distance)}
+export function addWord(current,recipe,distance='odd'){if(current.length>=5)return {recipe:resolveRecipe(recipe?.id),words:current,distance};const resolved=resolveRecipe(recipe?.id),used=current.map(w=>w.role);const slot=shuffle(resolved.optional.filter(item=>!used.includes(item.role)))[0];if(!slot)return {recipe:resolved,words:current,distance};const word=weighted(candidates(slot,current.map(w=>w.id),distance,current.find(w=>w.role==='subject')));return word?{recipe:resolved,words:[...current,{...word,role:slot.role,locked:false}],distance}:{recipe:resolved,words:current,distance}}
+export function removeOptional(current,recipe){const required=new Set(resolveRecipe(recipe?.id).required.map(s=>s.role));const index=[...current].map((word,i)=>({word,i})).reverse().find(x=>!x.word.locked&&!required.has(x.word.role))?.i;return index===undefined?current:[...current.slice(0,index),...current.slice(index+1)]}
