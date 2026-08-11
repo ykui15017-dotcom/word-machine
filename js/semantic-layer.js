@@ -1,0 +1,7 @@
+import {SEMANTIC_OVERRIDES} from '../data/semantic-overrides.js';
+const DEFAULTS={
+  object:['subject','anomaly'],container:['subject','container','anomaly'],space:['space'],living:['subject','anomaly'],organic:['anomaly','subject','organic'],material:['material','anomaly'],action:['relation','mechanism'],state:['anomaly','state','relation'],relation:['relation'],scale:['scale'],visual:['visual'],concept:['concept','anomaly_rule'],detail:['detail','surface_source','anomaly_source'],observation:['observation_source','detail','surface_source','structure_source','anomaly_source']
+};
+export function normalizeWord(word={}){const override=SEMANTIC_OVERRIDES[word.text]||{};return {...word,roles:[...new Set([...(override.roles||DEFAULTS[word.category]||[])])],domain:override.domain||'unknown',physicalTraits:override.physicalTraits||[],surfaceTraits:override.surfaceTraits||[],compatibleRelations:override.compatibleRelations||[],incompatibleRelations:override.incompatibleRelations||[],abstraction:override.abstraction??(word.category==='concept'?1:0),visualStrength:override.visualStrength??(['object','container','living','organic','material','detail','observation'].includes(word.category)?.75:.45),realizability:override.realizability||'unknown'} }
+export const canFill=(word,slot)=>{const normalized=normalizeWord(word);return slot.accepts.some(role=>normalized.roles.includes(role))};
+export const isPhysicalSubject=word=>normalizeWord(word).roles.includes('subject')&&!['concept','visual','scale','action','relation'].includes(word.category);

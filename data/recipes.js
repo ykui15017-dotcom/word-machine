@@ -1,17 +1,27 @@
-// coreSlots establish the idea; optionalSlots are shuffled for every drop.
-// `slots` remains the public compatibility list used by the bank and tests.
-const recipe=(id,label,coreSlots,optionalSlots,sentence,weight=1)=>({id,label,coreSlots,optionalSlots,slots:[...new Set([...coreSlots,...optionalSlots])],sentence,weight});
-export const RECIPES = [
-  recipe('wrong_contents','错误内容物',['container'],['object','state','material','detail','concept'],'contents'),
-  recipe('physical_anomaly','物理异常',['object'],['state','material','action','scale','visual','detail'],'physical'),
-  recipe('wrong_space','错误空间',['space'],['object','action','visual','scale','concept'],'space'),
-  recipe('two_worlds','两种世界结合',['object','organic'],['relation','material','state','visual','detail'],'relation'),
-  recipe('too_many','数量失控',['scale'],['object','space','action','relation','visual','detail'],'quantity'),
-  recipe('full_scene','完整场景',['space','object'],['container','state','visual','relation','scale','detail'],'scene'),
-  recipe('living_material','生命换肤',['living'],['material','action','detail','state','visual','scale'],'living'),
-  recipe('observation_echo','观察回声',['observation'],['object','relation','visual','material','scale','action'],'observation',.72),
-  recipe('concept_stage','概念布景',['concept'],['object','space','visual','relation','state','detail'],'concept'),
-  recipe('surface_study','表面研究',['detail'],['object','material','visual','scale','state','observation'],'detail',.9),
-  recipe('contained_life','容器生态',['container','organic'],['living','state','relation','visual','scale'],'ecosystem'),
-  recipe('light_measure','光线尺度',['visual'],['scale','space','object','material','concept','detail'],'light')
+const skeleton=(id,label,required,optional,sentence,weight=1)=>({
+  id,label,required,optional,sentence,weight,
+  // Kept for old consumers and saved data; generation no longer uses category slots.
+  coreSlots:required.map(slot=>slot.role),optionalSlots:optional.map(slot=>slot.role),
+  slots:[...new Set([...required,...optional].flatMap(slot=>slot.categories||[]))]
+});
+const slot=(role,accepts,categories=[])=>({role,accepts,categories});
+const subject=slot('subject',['subject'],['object','container','living','organic']);
+const relation=(kind='relation')=>slot('relation',['relation',kind],['action','relation','state']);
+
+export const RECIPES=[
+  skeleton('wrong_contents','错误内容物',[slot('subject',['container','subject'],['container']),slot('anomaly',['anomaly'],['object','organic','material']),relation('inside_relation')],[slot('space',['space'],['space']),slot('visual',['visual'],['visual']),slot('detail',['detail','surface_source'],['detail','observation']),slot('scale',['scale'],['scale'])],'wrong_contents'),
+  skeleton('structure_replacement','结构替换',[subject,slot('detail',['detail','structure_source'],['detail','observation']),slot('anomaly',['anomaly','subject'],['object','organic','material']),relation('replacement_relation')],[slot('visual',['visual'],['visual']),slot('space',['space'],['space'])],'structure_replacement'),
+  skeleton('organic_invasion','有机侵入',[subject,slot('anomaly',['organic','anomaly'],['organic','living']),relation('invasion_relation')],[slot('space',['space'],['space']),slot('visual',['visual'],['visual']),slot('detail',['detail'],['detail'])],'organic_invasion'),
+  skeleton('surface_transfer','表面转移',[subject,slot('anomaly',['surface_source','observation_source','detail','anomaly_source'],['observation','detail']),relation('transfer_relation')],[slot('space',['space'],['space']),slot('visual',['visual'],['visual']),slot('detail',['detail'],['detail'])],'surface_transfer'),
+  skeleton('scale_anomaly','尺度失控',[subject,slot('scale',['scale'],['scale']),relation('scale_relation')],[slot('space',['space'],['space']),slot('visual',['visual'],['visual']),slot('detail',['detail','observation_source'],['detail','observation'])],'scale_anomaly'),
+  skeleton('function_misplacement','功能错置',[subject,slot('anomaly',['concept','anomaly_rule','anomaly'],['concept','state']),relation('mechanism')],[slot('visual',['visual'],['visual']),slot('space',['space'],['space'])],'function_misplacement'),
+  skeleton('space_closure','空间封闭',[slot('space',['space'],['space']),subject,slot('concept',['concept','anomaly_rule'],['concept']),relation('spatial_relation')],[slot('visual',['visual'],['visual']),slot('detail',['detail'],['detail']),slot('scale',['scale'],['scale'])],'space_closure'),
+  skeleton('wrong_attachment','错误附着',[subject,slot('anomaly',['surface_source','phenomenon','detail','anomaly'],['detail','observation','organic']),relation('attachment_relation')],[slot('space',['space'],['space']),slot('visual',['visual'],['visual'])],'wrong_attachment'),
+  skeleton('quantity_anomaly','数量异常',[subject,slot('anomaly',['subject','anomaly'],['object','container','living','organic']),slot('scale',['scale'],['scale']),relation('fill_relation')],[slot('space',['space'],['space']),slot('visual',['visual'],['visual'])],'quantity_anomaly'),
+  skeleton('material_illusion','材料错觉',[subject,slot('anomaly',['material','anomaly'],['material','organic']),relation('transformation_relation')],[slot('visual',['visual'],['visual']),slot('detail',['detail'],['detail']),slot('space',['space'],['space'])],'material_illusion'),
+  skeleton('observation_magnify','观察碎片放大',[slot('anomaly',['observation_source','structure_source','surface_source'],['observation']),subject,relation('transfer_relation')],[slot('scale',['scale'],['scale']),slot('space',['space'],['space']),slot('visual',['visual'],['visual'])],'observation_magnify'),
+  skeleton('still_life_collision','静物错位拼接',[subject,slot('anomaly',['subject','anomaly'],['object','container','living','organic']),relation('physical_relation')],[slot('detail',['detail','observation_source'],['detail','observation']),slot('visual',['visual'],['visual']),slot('space',['space'],['space'])],'still_life_collision')
 ];
+
+export const LEGACY_RECIPE_MAP={physical_anomaly:'structure_replacement',wrong_space:'space_closure',two_worlds:'still_life_collision',too_many:'quantity_anomaly',full_scene:'still_life_collision',living_material:'material_illusion',observation_echo:'observation_magnify',concept_stage:'space_closure',surface_study:'surface_transfer',contained_life:'organic_invasion',light_measure:'still_life_collision'};
+export function resolveRecipe(id){const resolved=LEGACY_RECIPE_MAP[id]||id;return RECIPES.find(recipe=>recipe.id===resolved)||RECIPES[0]}
