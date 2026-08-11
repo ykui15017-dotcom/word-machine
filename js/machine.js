@@ -1,44 +1,66 @@
-import {newDrop,replaceUnlocked} from './random-engine.js';
-import {buildSentence} from './sentence-builder.js';
+import {composeIngredientText} from './ingredient-composer.js';
 import {saveDrop,setMachineState,getMachineState,getIngredients,removeIngredient,clearIngredients} from './storage.js';
 import {initNav,escapeHtml} from './common.js';
 
 initNav();
-let state=getMachineState();
-if(!state?.scenePlan) state=newDrop(4,[],null,'odd');
-let developed=false;
 const idea=document.querySelector('.recipe-text');
 const message=document.querySelector('.aside-message');
+const resultState=document.querySelector('.result-state');
+const developPanel=document.querySelector('.develop-panel');
+let variation=0;
+let hasResult=false;
+let messageTimer;
 
+const ingredientKey=items=>items.map(item=>item.id).join('|');
+const savedState=getMachineState();
+if(savedState?.composerKey===ingredientKey(getIngredients())&&savedState.composedText){
+  idea.textContent=savedState.composedText;
+  variation=savedState.variation||0;
+  hasResult=true;
+  resultState.textContent='RESTORED COMPOSITION';
+}
+
+function ingredientCard(word,compact=false){
+  return `<span class="ingredient ${compact?'compact':''}"><i class="category-${escapeHtml(word.category)}"></i><b>${escapeHtml(word.text)}</b><small>${escapeHtml(word.category)}</small><button data-remove="${escapeHtml(word.id)}" aria-label="删除 ${escapeHtml(word.text)}">×</button></span>`;
+}
 function renderTray(){
   const ingredients=getIngredients();
   document.querySelectorAll('.ingredient-tray').forEach((tray,index)=>{
-    tray.innerHTML=ingredients.length?ingredients.map(word=>`<span class="ingredient ${index?'compact':''}"><i class="category-${word.category}"></i><b>${escapeHtml(word.text)}</b><small>${escapeHtml(word.category)}</small><button data-remove="${escapeHtml(word.id)}" aria-label="删除 ${escapeHtml(word.text)}">×</button></span>`).join(''):`<a class="empty-slot" href="./word-bank.html">＋<small>ADD FROM ARCHIVE</small></a>`;
+    tray.innerHTML=ingredients.length?ingredients.map(word=>ingredientCard(word,index>0)).join(''):`<a class="empty-slot" href="./word-bank.html">＋<small>ADD FROM WORD BANK</small></a>`;
   });
+  if(!ingredients.length){hasResult=false;idea.textContent='从 Word Bank 选择词语，再让它们在这里相遇。';resultState.textContent='WAITING FOR INGREDIENTS'}
 }
-function persist(){setMachineState({...state,distance:'odd'})}
-function compose(){
-  developed=false;
-  idea.textContent=buildSentence(state.scenePlan,null,'short');
-  persist();
+function say(text){
+  clearTimeout(messageTimer);message.textContent=text;
+  messageTimer=setTimeout(()=>{if(message.textContent===text)message.textContent=''},2600);
 }
-function say(text){message.textContent=text;setTimeout(()=>{if(message.textContent===text)message.textContent=''},2400)}
+function compose(isAnother=false){
+  const ingredients=getIngredients();
+  if(!ingredients.length){say('请先从 Word Bank 添加 ingredient。');return}
+  variation=isAnother?variation+1:hasResult?variation+1:0;
+  idea.classList.remove('result-enter');void idea.offsetWidth;
+  idea.textContent=composeIngredientText(ingredients,variation);
+  idea.classList.add('result-enter');hasResult=true;
+  resultState.textContent=isAnother?'REWRITTEN · SAME WORDS':'COMPOSED · WORDS KEPT';
+  setMachineState({composerKey:ingredientKey(ingredients),composedText:idea.textContent,variation,words:ingredients});
+  say(isAnother?'表达已改写；ingredients 保持不变。':'组合完成。');
+}
 
 document.addEventListener('click',event=>{
   const remove=event.target.closest('[data-remove]');
-  if(remove){removeIngredient(remove.dataset.remove);renderTray();return}
-  if(event.target.closest('.clear-ingredients')){clearIngredients();renderTray();return}
-  const action=event.target.closest('[data-action]')?.dataset.action;
-  if(action==='compose') compose();
-  if(action==='another'){
-    // Phase one deliberately leaves the persistent ingredient tray untouched.
-    state=replaceUnlocked(state.words,state.operation,'odd');compose();say('Another arrangement; your ingredients stayed in place.');
-  }
+  if(remove){removeIngredient(remove.dataset.remove);hasResult=false;renderTray();say('Ingredient removed.');return}
+  if(event.target.closest('.clear-ingredients')){clearIngredients();hasResult=false;renderTray();say('Ingredient Tray cleared.');return}
+  const control=event.target.closest('[data-action]');
+  const action=control?.dataset.action;
+  if(action==='compose')compose(false);
+  if(action==='another')compose(true);
   if(action==='save'){
-    saveDrop({words:state.words,recipe:idea.textContent,recipeId:state.operation.id,scenePlan:state.scenePlan,ingredients:getIngredients()});say('Idea saved.');
+    if(!hasResult){say('请先 COMPOSE，再保存当前结果。');return}
+    const ingredients=getIngredients();saveDrop({words:ingredients,ingredients,recipe:idea.textContent,recipeId:'ingredient-composer'});say('Idea saved — 可在 SAVED 页面查看。');
   }
   if(action==='develop'){
-    developed=!developed;idea.textContent=buildSentence(state.scenePlan,null,developed?'expanded':'short');say(developed?'Expanded using the current Composer.':'Returned to the short idea.');
+    const opening=developPanel.hidden;developPanel.hidden=!opening;control.setAttribute('aria-expanded',opening);
+    say(opening?'已打开下一阶段说明。':'已收起开发说明。');
   }
 });
 renderTray();
