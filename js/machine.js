@@ -17,7 +17,7 @@ if(savedState?.composerKey===ingredientKey(getIngredients())&&savedState.compose
   idea.textContent=savedState.composedText;
   variation=savedState.variation||0;
   hasResult=true;
-  resultState.textContent='RESTORED COMPOSITION';
+  resultState.textContent='已恢复构想';
 }
 
 function ingredientCard(word,compact=false){
@@ -26,9 +26,9 @@ function ingredientCard(word,compact=false){
 function renderTray(){
   const ingredients=getIngredients();
   document.querySelectorAll('.ingredient-tray').forEach((tray,index)=>{
-    tray.innerHTML=ingredients.length?ingredients.map(word=>ingredientCard(word,index>0)).join(''):`<a class="empty-slot" href="./word-bank.html">＋<small>ADD FROM WORD BANK</small></a>`;
+    tray.innerHTML=ingredients.length?ingredients.map(word=>ingredientCard(word,index>0)).join(''):`<a class="empty-slot" href="./word-bank.html">＋<small>从词库添加</small></a>`;
   });
-  if(!ingredients.length){hasResult=false;idea.textContent='从 Word Bank 选择词语，再让它们在这里相遇。';resultState.textContent='WAITING FOR INGREDIENTS'}
+  if(!ingredients.length){hasResult=false;idea.textContent='从词库选择词语，再让它们在这里相遇。';resultState.textContent='等待词语'}
 }
 function say(text){
   clearTimeout(messageTimer);message.textContent=text;
@@ -36,27 +36,27 @@ function say(text){
 }
 function compose(isAnother=false){
   const ingredients=getIngredients();
-  if(!ingredients.length){say('请先从 Word Bank 添加 ingredient。');return}
+  if(!ingredients.length){say('请先从词库添加词语。');return}
   variation=isAnother?variation+1:hasResult?variation+1:0;
   idea.classList.remove('result-enter');void idea.offsetWidth;
   idea.textContent=composeIngredientText(ingredients,variation);
   idea.classList.add('result-enter');hasResult=true;
-  resultState.textContent=isAnother?'REWRITTEN · SAME WORDS':'COMPOSED · WORDS KEPT';
+  resultState.textContent=isAnother?'已换一种组合 · 原词保留':'组合完成 · 原词保留';
   setMachineState({composerKey:ingredientKey(ingredients),composedText:idea.textContent,variation,words:ingredients});
-  say(isAnother?'表达已改写；ingredients 保持不变。':'组合完成。');
+  say(isAnother?'表达已改写；原词保持不变。':'组合完成。');
 }
 
 document.addEventListener('click',event=>{
   const remove=event.target.closest('[data-remove]');
-  if(remove){removeIngredient(remove.dataset.remove);hasResult=false;renderTray();say('Ingredient removed.');return}
-  if(event.target.closest('.clear-ingredients')){clearIngredients();hasResult=false;renderTray();say('Ingredient Tray cleared.');return}
+  if(remove){removeIngredient(remove.dataset.remove);hasResult=false;renderTray();say('已移除词语。');return}
+  if(event.target.closest('.clear-ingredients')){clearIngredients();hasResult=false;renderTray();say('已清空词卡托盘。');return}
   const control=event.target.closest('[data-action]');
   const action=control?.dataset.action;
   if(action==='compose')compose(false);
   if(action==='another')compose(true);
   if(action==='save'){
-    if(!hasResult){say('请先 COMPOSE，再保存当前结果。');return}
-    const ingredients=getIngredients();saveDrop({words:ingredients,ingredients,recipe:idea.textContent,recipeId:'ingredient-composer'});say('Idea saved — 可在 SAVED 页面查看。');
+    if(!hasResult){say('请先生成构想，再保存当前结果。');return}
+    const ingredients=getIngredients();saveDrop({words:ingredients,ingredients,recipe:idea.textContent,recipeId:'ingredient-composer'});say('灵感已保存，可在收藏页面查看。');
   }
   if(action==='develop'){
     const opening=developPanel.hidden;developPanel.hidden=!opening;control.setAttribute('aria-expanded',opening);
