@@ -260,3 +260,59 @@ h1, h2, h3, p { letter-spacing: 0; }
   .tray-footer { grid-template-columns: 1fr auto; }
   .tray-mini { grid-column: 1 / -1; grid-row: 2; }
 }
+
+/* Machine layout: one centered workbench system */
+.machine-header .brand { visibility: hidden; }
+.composer-main { width: min(100%, 960px); padding: 44px 24px 76px; }
+.composer-intro { width: min(100%, 760px); margin: 0 auto 32px; text-align: center; }
+.composer-intro h1 { transform: none; transform-origin: center; }
+.composer-intro > p { margin-top: 8px; }
+.composer-workbench,
+.composer-output,
+.tray-footer { width: min(100%, 760px); max-width: none; }
+.composer-workbench { min-width: 0; margin: 0 auto; padding-top: 0; }
+.desk-surface { height: 520px; transform: none; }
+.ingredient-rail { position: absolute; z-index: 5; top: 22px; left: 28px; right: 28px; min-width: 0; }
+.ingredient-rail h2 { margin: 0 0 10px; font: 600 var(--type-section-title)/1.4 var(--font-zh); }
+.composer-ingredients { position: static; min-height: 90px; min-width: 0; padding: 3px 0 10px; overflow-x: auto; overflow-y: hidden; display: flex; flex-wrap: nowrap; align-items: flex-start; gap: 10px; scrollbar-width: thin; }
+.composer-ingredients .ingredient { flex: 0 0 104px; width: 104px; min-height: 78px; padding: 13px 9px 9px; transform: none; }
+.ingredient-rail .sketch-link { position: absolute; top: 0; right: 0; padding-bottom: 2px; border-bottom: 1px solid var(--red); color: var(--ink); font-size: var(--type-body); text-decoration: none; }
+.desk-lip { top: 150px; }
+.desk-surface::before { inset: 156px 23px 24px; }
+.dial-area { top: 181px; left: 55px; width: 410px; }
+.desk-control { top: 205px; right: 104px; }
+.compose-trigger { right: 64px; bottom: 30px; width: 94px; height: 94px; }
+.composer-output { margin: 52px auto 0; }
+.composer-output > header { padding: 0 2px 10px; }
+.output-paper { min-height: 170px; padding: 42px 54px; }
+.output-paper::after { display: none; }
+.recipe-text { font-size: var(--type-body); line-height: 1.9; }
+.composer-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.composer-actions > * { min-height: 42px; padding: 8px 10px; border-radius: 4px; white-space: nowrap; }
+.tray-footer { min-height: 72px; margin: 42px auto 0; padding: 14px 2px; grid-template-columns: 112px minmax(0, 1fr) auto; }
+.tray-footer > div:first-child span { font-size: var(--type-section-title); font-weight: 600; }
+.tray-mini { flex-wrap: nowrap; overflow-x: auto; padding: 3px 0; }
+.tray-mini .ingredient { flex: 0 0 auto; border-color: var(--line); background: #faf6ec99; box-shadow: none; }
+.tray-empty { color: var(--muted); font-size: var(--type-body); }
+
+@media (max-width: 650px) {
+  .machine-header .brand { visibility: visible; }
+  .composer-main { padding: 30px 15px 60px; }
+  .composer-intro { margin-bottom: 25px; }
+  .composer-intro h1 { font-size: 38px; }
+  .desk-surface { height: 500px; min-height: 0; }
+  .ingredient-rail { top: 18px; left: 16px; right: 16px; }
+  .composer-ingredients { min-height: 84px; }
+  .composer-ingredients .ingredient { flex-basis: 92px; width: 92px; min-height: 72px; }
+  .desk-lip { top: 142px; }
+  .desk-surface::before { inset: 148px 12px 15px; box-shadow: none; }
+  .desk-surface::after { top: auto; height: 5px; }
+  .dial-area { top: 178px; left: 10px; width: calc(100% - 90px); bottom: auto; }
+  .composition-dial { width: min(100%, 330px); height: 220px; }
+  .desk-control { top: 198px; right: 32px; bottom: auto; transform: scale(.85); }
+  .compose-trigger { right: 28px; bottom: 28px; width: 84px; height: 84px; }
+  .output-paper { padding: 34px 27px 40px; }
+  .composer-actions { grid-template-columns: repeat(2, 1fr); }
+  .tray-footer { grid-template-columns: 1fr auto; }
+  .tray-mini { grid-column: 1 / -1; grid-row: 2; }
+}
