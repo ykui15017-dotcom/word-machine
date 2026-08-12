@@ -2,23 +2,23 @@
 <html lang="zh-CN">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Word Machine 视觉灵感组合工作台"><title>工作台 — Word Machine</title><link rel="stylesheet" href="./css/styles.css"></head>
 <body>
-<header class="site-header"><a class="brand" href="./index.html">WORD MACHINE</a><button class="menu-button" aria-expanded="false" aria-label="打开导航">菜单</button><nav class="nav-links" aria-label="主要导航"><a href="./index.html" aria-current="page">工作台</a><a href="./word-bank.html">词库</a><a href="./observations.html">观察</a><a href="./saved.html">收藏</a></nav></header>
+<header class="site-header machine-header"><button class="menu-button" aria-expanded="false" aria-label="打开导航">菜单</button><nav class="nav-links" aria-label="主要导航"><a href="./index.html" aria-current="page">工作台</a><a href="./word-bank.html">词仓</a><a href="./observations.html">观察</a><a href="./saved.html">收藏</a></nav></header>
 <main class="composer-main">
-<header class="composer-intro"><p class="folio">01 / MACHINE</p><div><h1>开放式工作台</h1><p>选择词语，排列组合，<br>生成你的视觉构想。</p></div></header>
+<header class="composer-intro"><h1>WORD MACHINE</h1><p>让选中的词，在这里形成一种视觉关系。</p></header>
 <section class="composer-workbench" aria-labelledby="workbench-title">
-<div class="workbench-heading"><div><span class="hand-number">①</span><p class="folio">当前词卡</p><h2 id="workbench-title">把选中的词放在桌上</h2></div><a class="sketch-link" href="./word-bank.html">＋ 添加词语</a></div>
+<div class="workbench-heading"><h2 id="workbench-title">已选元素</h2><a class="sketch-link" href="./word-bank.html">＋ 加入元素</a></div>
 <div class="desk-surface">
-<div class="desk-caption">你的词卡</div><div class="composer-ingredients ingredient-tray" aria-label="已选词卡"></div>
-<div class="dial-area" aria-hidden="true"><span class="dial-label">关系 / 组合</span><div class="composition-dial"><i></i><i></i><i></i><b></b></div><small>转动圆盘，寻找词语之间的另一种连接</small></div>
+<div class="composer-ingredients ingredient-tray" aria-label="已选词卡"></div>
+<div class="dial-area" aria-hidden="true"><div class="composition-dial"><i></i><i></i><i></i><b></b></div></div>
 <div class="desk-control" aria-hidden="true"><span>具象</span><i><b></b></i><span>抽象</span></div>
-<button class="compose-trigger" data-action="compose"><span>COMPOSE</span><small>生成构想</small></button>
+<button class="compose-trigger" data-action="compose"><span>生成构想</span></button>
 </div></section>
 <section class="composer-output" aria-labelledby="output-title">
-<header><div><span class="hand-number">②</span><p class="folio">当前构想</p></div><span class="result-state" aria-live="polite">等待词语</span></header>
-<div class="output-paper"><h2 id="output-title">构想草稿</h2><p class="recipe-text" aria-live="polite">从词库选择词语，再让它们在这里相遇。</p><p class="output-meta">保留原词 · 只改变观察方式</p></div>
-<div class="composer-actions" aria-label="组合操作"><button data-action="another">换一种组合<small>保留同一组词</small></button><a href="./word-bank.html">添加词语<small>前往词库</small></a><button data-action="save">保存灵感<small>收藏当前结果</small></button><button data-action="develop" aria-expanded="false">继续展开<small>查看下一步</small></button></div>
+<header><h2 id="output-title">视觉构想</h2><span class="result-state" aria-live="polite">等待词语</span></header>
+<div class="output-paper"><p class="recipe-text" aria-live="polite">从词仓选择元素，再让它们在这里相遇。</p></div>
+<div class="composer-actions" aria-label="组合操作"><button data-action="another">另一种关系</button><a href="./word-bank.html">加入元素</a><button data-action="save">保存构想</button><button data-action="develop" aria-expanded="false">继续发展</button></div>
 <div class="develop-panel" hidden><strong>下一步</strong><p>把这句话当作草图：接下来可以记录构图、材质与光线。完整的开发工具将在下一阶段开放。</p></div><p class="aside-message" aria-live="polite"></p>
 </section>
-<section class="tray-footer" aria-label="词卡托盘"><div><span>词卡托盘</span><small>跨页面保留</small></div><div class="tray-mini ingredient-tray"></div><button class="clear-ingredients">清空</button></section>
+<section class="tray-footer" aria-label="已选元素托盘"><div><span>已选元素托盘</span></div><div class="tray-mini ingredient-tray"></div><button class="clear-ingredients">清空</button></section>
 </main><footer class="site-footer">WORD MACHINE · 视觉构想工作台 · <span class="year"></span></footer><div class="toast" role="status" aria-live="polite"></div><script type="module" src="./js/machine.js"></script>
 </body></html>
