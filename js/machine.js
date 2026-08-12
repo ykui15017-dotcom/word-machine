@@ -26,9 +26,9 @@ function ingredientCard(word,compact=false){
 function renderTray(){
   const ingredients=getIngredients();
   document.querySelectorAll('.ingredient-tray').forEach((tray,index)=>{
-    tray.innerHTML=ingredients.length?ingredients.map(word=>ingredientCard(word,index>0)).join(''):`<a class="empty-slot" href="./word-bank.html">＋<small>从词库添加</small></a>`;
+    tray.innerHTML=ingredients.length?ingredients.map(word=>ingredientCard(word,index>0)).join(''):(index>0?'<span class="tray-empty">还没有选择词语</span>':'');
   });
-  if(!ingredients.length){hasResult=false;idea.textContent='让“板装药片”成为画面的起点，使鱼缸、金鱼与水母沿着它的边缘逐渐出现，像一条刚被发现的视觉线索。';resultState.textContent='示例构想'}
+  if(!ingredients.length){hasResult=false;idea.textContent='从词库选择词语，再让它们在这里相遇。';resultState.textContent='等待词语'}
 }
 function say(text){
   clearTimeout(messageTimer);message.textContent=text;
