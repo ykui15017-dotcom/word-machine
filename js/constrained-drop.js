@@ -11,6 +11,31 @@ const pick=(items,rng)=>items[Math.floor(rng()*items.length)];
 const poolFor=role=>ELIGIBLE_RANDOM_WORDS.filter(word=>word.role===role);
 const uniquePush=(result,word)=>{if(word&&!result.some(item=>item.id===word.id))result.push({...word,role:roleFor(word)})};
 
+// These are scene rhythms rather than a mandatory category checklist. Some
+// drops lean on two visible subjects, while others emphasize action or view.
+const MACHINE_STRUCTURES=[
+  ['subject','space','relation','condition','view'],
+  ['subject','subject','relation','condition','view'],
+  ['subject','space','relation','relation','view'],
+  ['subject','subject','space','relation','condition']
+];
+
+/** Preserve up to three hand-picked words and complete them into a scene. */
+export function completeConstrainedIngredients(seeds=[],rng=Math.random){
+  const kept=seeds.length<5?seeds.slice(0,3):[];
+  const result=[];
+  kept.forEach(word=>uniquePush(result,{...word,role:roleFor(word),isSeed:true}));
+  const structure=MACHINE_STRUCTURES[Math.floor(rng()*MACHINE_STRUCTURES.length)];
+  for(const role of structure){
+    if(result.length>=5)break;
+    uniquePush(result,pick(poolFor(role).filter(word=>!result.some(item=>item.id===word.id)),rng));
+  }
+  // A duplicate seed/category can consume a slot in the rhythm; use concrete
+  // subjects as a stable fallback so the machine still returns five cards.
+  while(result.length<5)uniquePush(result,pick(ELIGIBLE_RANDOM_WORDS.filter(word=>!result.some(item=>item.id===word.id)),rng));
+  return result;
+}
+
 /** Generate by scene roles, never by sampling the complete word bank. */
 export function createConstrainedDrop(mode='quick',seed=null,rng=Math.random){
   const structure=DROP_STRUCTURES[mode]||DROP_STRUCTURES.quick;
