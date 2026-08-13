@@ -1,4 +1,4 @@
-import {BASE_WORDS,CATEGORIES} from '../data/words/index.js';
+import {BASE_WORDS,CATEGORIES,CATEGORY_LABELS} from '../data/words/index.js';
 import {getMyWords,getIngredients,addIngredient,removeIngredient,clearIngredients} from './storage.js';
 import {initNav,escapeHtml} from './common.js';
 
@@ -6,7 +6,7 @@ initNav();
 const filters=document.querySelector('.filters'),list=document.querySelector('.word-list'),input=document.querySelector('.search'),count=document.querySelector('.bank-count');
 let active='all';
 const labels=['all',...CATEGORIES,'my words'];
-filters.innerHTML=labels.map((x,i)=>`<button class="filter ${i?'':'active'}" data-cat="${x.replace(' ','-')}">${x.toUpperCase()}</button>`).join('');
+filters.innerHTML=labels.map((x,i)=>`<button class="filter ${i?'':'active'}" data-cat="${x.replace(' ','-')}">${CATEGORY_LABELS[x]||x.toUpperCase()}</button>`).join('');
 const allWords=()=>[...BASE_WORDS,...getMyWords()];
 
 function renderDock(){

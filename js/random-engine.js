@@ -9,8 +9,8 @@ const all=()=>[...BASE_WORDS,...getMyWords()].map(normalizeWord);
 const pick=list=>list.length?list[Math.floor(Math.random()*list.length)]:null;
 const unique=words=>[...new Map(words.filter(Boolean).map(w=>[w.id,w])).values()];
 const candidates=(categories,excluded=[])=>all().filter(w=>categories.includes(w.category)&&!excluded.includes(w.id));
-const optionalCategories={space:['space'],visual:['visual'],detail:['detail','observation'],scale:['scale'],quantity:['scale'],rule:['concept']};
-const roleForLocked=word=>word.category==='space'?'space':word.category==='visual'?'visual':word.category==='scale'?'scale':word.category==='concept'?'rule':word.category==='observation'?'source':isPhysicalSubject(word)?'subject':'detail';
+const optionalCategories={space:['space'],visual:['visual'],detail:['material','organic_matter'],scale:['scale'],quantity:['scale']};
+const roleForLocked=word=>word.category==='space'?'space':word.category==='visual'?'visual':word.category==='scale'?'scale':isPhysicalSubject(word)?'subject':'detail';
 const acceptsLocked=(op,word)=>op.subjects.includes(word.category)||op.sources.includes(word.category)||op.optional.some(role=>(optionalCategories[role]||[]).includes(word.category));
 const compatibleOperations=locked=>VISUAL_OPERATIONS.filter(op=>locked.every(word=>acceptsLocked(op,normalizeWord(word))));
 function assign(operation,locked=[]){
@@ -58,6 +58,6 @@ export function composeFixture(operation,ingredients,mode='odd'){
   if(operation==='OBSERVATION_MAGNIFY')take(w=>w.category==='space'||isPhysicalSubject(w),'subject');else take(w=>op.subjects.includes(w.category),'subject');
   take(w=>op.sources.includes(w.category),'source');
   for(const role of ['space','scale','visual','detail','rule'])take(w=>!['subject','source'].includes(w.sceneRole)&&(optionalCategories[role]||[]).includes(w.category),role);
-  for(const word of words.filter(w=>!assigned.includes(w))){word.sceneRole=word.category==='concept'?'rule':word.category==='observation'?'detail':'detail';assigned.push(word)}
+  for(const word of words.filter(w=>!assigned.includes(w))){word.sceneRole='detail';assigned.push(word)}
   const secondary=mode==='wild'&&assigned.some(w=>w.sceneRole==='detail')?'SURFACE_TRANSFER':null;return composeScenePlan({operation,words:assigned,mode,secondaryOperation:secondary});
 }
