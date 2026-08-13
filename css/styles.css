@@ -30,7 +30,6 @@ h1, h2, h3, p { letter-spacing: 0; }
 
 /* Shared shell */
 .site-header { height: 78px; max-width: 1320px; margin: auto; padding: 0 32px; border-bottom: 1px solid #35363066; display: flex; align-items: center; justify-content: space-between; }
-.machine-header { justify-content: space-between; }
 .brand { color: var(--ink); font: 700 var(--type-brand)/1 "Gaegu", sans-serif; letter-spacing: .04em; text-decoration: none; transform: rotate(-1deg); }
 .nav-links { display: flex; gap: 28px; }
 .nav-links a { color: var(--muted); font-size: var(--type-body); font-weight: 600; letter-spacing: .04em; text-decoration: none; }
@@ -72,16 +71,18 @@ h1, h2, h3, p { letter-spacing: 0; }
 .desk-surface > .sketch-link:active { transform: translateY(1px); }
 .dial-area { position: absolute; z-index: 3; top: 154px; left: 52px; width: 410px; text-align: center; }
 .dial-area > span { display: block; margin-bottom: 6px; font-size: var(--type-section-title); }
-.dial-area > small { display: block; margin-top: 8px; color: var(--muted); font-size: var(--type-meta); }
-.composition-dial { position: relative; width: 355px; height: 255px; margin: auto; border: 1px solid #454740; border-radius: 50%; background: repeating-radial-gradient(ellipse at center, transparent 0 34px, #5658503b 35px 36px), repeating-conic-gradient(from 2deg, #44463f55 0 .5deg, transparent .5deg 15deg), #f4efe4; box-shadow: 2px 6px 0 #3332, inset 0 0 22px #635d5010; }
-.composition-dial::before, .composition-dial::after { content: ""; position: absolute; border-radius: 50%; }
-.composition-dial::before { inset: 18px; border: 1px dashed #68696166; }
-.composition-dial::after { inset: 48px; border: 1px solid #68696144; }
-.composition-dial i { position: absolute; z-index: 2; width: 11px; height: 11px; border: 1px solid #3f403b; border-radius: 50%; background: var(--sage); }
-.composition-dial i:first-child { top: 122px; left: 52px; }
-.composition-dial i:nth-child(2) { top: 57px; right: 70px; background: var(--red); }
-.composition-dial i:nth-child(3) { right: 90px; bottom: 42px; background: var(--blue); }
+.composition-dial { position: relative; width: 355px; height: 255px; margin: auto; }
+.dial-rotor { position: absolute; inset: 0; border: 1px solid #454740; border-radius: 50%; background: repeating-radial-gradient(ellipse at center, transparent 0 34px, #5658503b 35px 36px), repeating-conic-gradient(from 2deg, #44463f55 0 .5deg, transparent .5deg 15deg), #f4efe4; box-shadow: 2px 6px 0 #3332, inset 0 0 22px #635d5010; }
+.dial-rotor::before, .dial-rotor::after { content: ""; position: absolute; border-radius: 50%; }
+.dial-rotor::before { inset: 18px; border: 1px dashed #68696166; }
+.dial-rotor::after { inset: 48px; border: 1px solid #68696144; }
+.dial-rotor i { position: absolute; z-index: 2; width: 11px; height: 11px; border: 1px solid #3f403b; border-radius: 50%; background: var(--sage); }
+.dial-rotor i:first-child { top: 122px; left: 52px; }
+.dial-rotor i:nth-child(2) { top: 57px; right: 70px; background: var(--red); }
+.dial-rotor i:nth-child(3) { right: 90px; bottom: 42px; background: var(--blue); }
 .composition-dial b { position: absolute; z-index: 3; top: 50%; left: 50%; width: 56px; height: 56px; border: 1px solid #343630; border-radius: 50%; background: #d9d1c2; box-shadow: inset 0 0 0 10px #f8f3e8, 3px 4px 0 #3332; transform: translate(-50%, -50%); }
+.composition-dial.is-spinning .dial-rotor { animation: dial-spin .8s ease-out; }
+@keyframes dial-spin { to { transform: rotate(360deg); } }
 .desk-control { position: absolute; z-index: 3; right: 86px; top: 180px; color: var(--muted); font-size: var(--type-meta); display: grid; justify-items: center; gap: 7px; }
 .desk-control i { position: relative; width: 9px; height: 142px; border: 1px solid #454740; border-radius: 5px; background: #d8d2c5; box-shadow: inset 2px 0 #fff8; }
 .desk-control b { position: absolute; top: 31px; left: -9px; width: 25px; height: 34px; border: 1px solid #44453f; border-radius: 3px; background: #f8f4e9; box-shadow: 2px 2px #3332; }
@@ -232,6 +233,7 @@ h1, h2, h3, p { letter-spacing: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+  .composition-dial.is-spinning .dial-rotor { animation: none !important; }
 }
 
 @media (max-width: 800px) {
@@ -262,7 +264,6 @@ h1, h2, h3, p { letter-spacing: 0; }
 }
 
 /* Machine layout: one centered workbench system */
-.machine-header .brand { visibility: hidden; }
 .composer-main { width: min(100%, 960px); padding: 44px 24px 76px; }
 .composer-intro { width: min(100%, 760px); margin: 0 auto 32px; text-align: center; }
 .composer-intro h1 { transform: none; transform-origin: center; }
@@ -296,7 +297,6 @@ h1, h2, h3, p { letter-spacing: 0; }
 .tray-empty { color: var(--muted); font-size: var(--type-body); }
 
 @media (max-width: 650px) {
-  .machine-header .brand { visibility: visible; }
   .composer-main { padding: 30px 15px 60px; }
   .composer-intro { margin-bottom: 25px; }
   .composer-intro h1 { font-size: 38px; }

@@ -7,6 +7,7 @@ const idea=document.querySelector('.recipe-text');
 const message=document.querySelector('.aside-message');
 const resultState=document.querySelector('.result-state');
 const developPanel=document.querySelector('.develop-panel');
+const compositionDial=document.querySelector('.composition-dial');
 let variation=0;
 let hasResult=false;
 let messageTimer;
@@ -34,6 +35,11 @@ function say(text){
   clearTimeout(messageTimer);message.textContent=text;
   messageTimer=setTimeout(()=>{if(message.textContent===text)message.textContent=''},2600);
 }
+function spinDial(){
+  compositionDial.classList.remove('is-spinning');
+  void compositionDial.offsetWidth;
+  compositionDial.classList.add('is-spinning');
+}
 function compose(isAnother=false){
   const ingredients=getIngredients();
   if(!ingredients.length){say('请先从词库添加词语。');return}
@@ -52,8 +58,8 @@ document.addEventListener('click',event=>{
   if(event.target.closest('.clear-ingredients')){clearIngredients();hasResult=false;renderTray();say('已清空词卡托盘。');return}
   const control=event.target.closest('[data-action]');
   const action=control?.dataset.action;
-  if(action==='compose')compose(false);
-  if(action==='another')compose(true);
+  if(action==='compose'){spinDial();compose(false)}
+  if(action==='another'){spinDial();compose(true)}
   if(action==='save'){
     if(!hasResult){say('请先生成构想，再保存当前结果。');return}
     const ingredients=getIngredients();saveDrop({words:ingredients,ingredients,recipe:idea.textContent,recipeId:'ingredient-composer'});say('灵感已保存，可在收藏页面查看。');
