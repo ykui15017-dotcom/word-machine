@@ -1,7 +1,9 @@
 const KEYS={words:'wm-my-words-v1',saved:'wm-saved-v1',machine:'wm-machine-v1',ingredients:'wm-ingredients-v3'};
 const read=(key,fallback=[])=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const write=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
-export const getMyWords=()=>read(KEYS.words);
+const LEGACY_CATEGORY={living:'life',organic:'organic_matter',detail:'material',observation:'material',concept:'state'};
+const migrateWord=word=>word&&LEGACY_CATEGORY[word.category]?{...word,category:LEGACY_CATEGORY[word.category],legacyCategory:word.category}:word;
+export const getMyWords=()=>read(KEYS.words).map(migrateWord);
 export const addMyWord=word=>{const words=getMyWords();words.unshift(word);write(KEYS.words,words);return words};
 export const removeMyWord=id=>write(KEYS.words,getMyWords().filter(w=>w.id!==id));
 export const getSaved=()=>read(KEYS.saved);
@@ -9,7 +11,7 @@ export const saveDrop=drop=>{const saved=getSaved();saved.unshift({...drop,id:`s
 export const removeSaved=id=>write(KEYS.saved,getSaved().filter(x=>x.id!==id));
 export const getMachineState=()=>read(KEYS.machine,null);
 export const setMachineState=state=>write(KEYS.machine,state);
-export const getIngredients=()=>read(KEYS.ingredients);
+export const getIngredients=()=>read(KEYS.ingredients).map(migrateWord);
 export const setIngredients=ingredients=>write(KEYS.ingredients,ingredients);
 export const addIngredient=word=>{const ingredients=getIngredients();if(!ingredients.some(item=>item.id===word.id))ingredients.push(word);setIngredients(ingredients);return ingredients};
 export const removeIngredient=id=>{const ingredients=getIngredients().filter(item=>item.id!==id);setIngredients(ingredients);return ingredients};
