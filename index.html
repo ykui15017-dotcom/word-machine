@@ -1,26 +1,24 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Word Machine 有约束的视觉灵感组合工作台"><title>工作台 — Word Machine</title><link rel="stylesheet" href="./css/styles.css"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Word Machine 视觉灵感组合工作台"><title>工作台 — Word Machine</title><link rel="stylesheet" href="./css/styles.css"></head>
 <body>
 <header class="site-header"><a class="brand" href="./index.html">WORD MACHINE</a><button class="menu-button" aria-expanded="false" aria-label="打开导航">MENU</button><nav class="nav-links" aria-label="主要导航"><a href="./index.html" aria-current="page">MACHINE</a><a href="./word-bank.html">WORD BANK</a><a href="./observations.html">OBSERVATIONS</a><a href="./saved.html">SAVED</a></nav></header>
-<main class="composer-main constrained-machine">
-  <header class="composer-intro"><span class="folio">CONSTRAINED RANDOM</span><h1>WORD MACHINE</h1><p>不是乱抽词。机器会按主体、空间、状态与关系，组装一张可以被拍出来的视觉草稿。</p></header>
-  <section class="drop-console" aria-labelledby="drop-title">
-    <div class="console-heading"><div><span class="folio">01 / CHOOSE AN ENTRY</span><h2 id="drop-title">选择一种掉落方式</h2></div><p>随机仍然保留，但只从具体、可见、可组合的词中按角色取样。</p></div>
-    <div class="entry-grid">
-      <button class="drop-entry" data-drop="quick"><b>Quick Drop</b><span>随机掉 3 个词</span><small>主体 · 空间 · 状态</small></button>
-      <button class="drop-entry featured" data-drop="scene"><b>Scene Drop</b><span>随机掉 5 个词</span><small>完整场景 + 光线 / 视角</small></button>
-      <button class="drop-entry" data-drop="seeded"><b>Seeded Drop</b><span>我先选 1 个词，系统补 3–4 个</span><small class="seed-status">先在词仓选择一个种子词</small></button>
-      <a class="drop-entry manual" href="./word-bank.html"><b>Word Bank</b><span>手动进入词仓添加</span><small>浏览、搜索并选择种子</small></a>
-    </div>
-  </section>
-  <section class="drop-result" aria-labelledby="output-title">
-    <header><div><span class="folio">02 / VISUAL DRAFT</span><h2 id="output-title">视觉草稿</h2></div><span class="result-state" aria-live="polite">等待掉落</span></header>
-    <div class="role-strip" aria-live="polite"><p class="empty-result">选择上方入口，机器会先搭结构，再写成画面。</p></div>
-    <div class="output-paper"><span class="paper-clip" aria-hidden="true"></span><p class="recipe-text" aria-live="polite">一个明确的主体，会在具体空间里获得状态、关系与观看方式。</p></div>
-    <div class="composer-actions"><button data-action="again" disabled>按同一结构再来一次</button><button data-action="save" disabled>保存视觉草稿</button><a href="./word-bank.html">换一个种子词</a></div>
-    <p class="aside-message" aria-live="polite"></p>
-  </section>
-</main>
-<footer class="site-footer">WORD MACHINE · 有约束的视觉灵感机器 · <span class="year"></span></footer><div class="toast" role="status" aria-live="polite"></div><script type="module" src="./js/machine.js"></script>
+<main class="composer-main">
+<header class="composer-intro"><h1>WORD MACHINE</h1><p>让选中的词在这里形成一种视觉关系。</p></header>
+<section class="composer-workbench" aria-label="视觉关系工作台">
+<div class="desk-surface">
+<div class="desk-lip" aria-hidden="true"></div>
+<div class="ingredient-rail"><h2>已选元素</h2><div class="composer-ingredients ingredient-tray" aria-label="已选元素"></div><div class="ingredient-actions"><button class="random-drop" data-action="random">随机掉落</button><a class="sketch-link" href="./word-bank.html">＋ 加入元素</a></div></div>
+<div class="dial-area" aria-hidden="true"><span>关系转盘</span><div class="composition-dial"><div class="dial-rotor"><i></i><i></i><i></i></div><b></b></div></div>
+<div class="desk-control" aria-hidden="true"><i><b></b></i></div>
+<button class="compose-trigger" data-action="compose"><span>COMPOSE</span></button>
+</div></section>
+<section class="composer-output" aria-labelledby="output-title">
+<header><h2 id="output-title">视觉构想</h2><span class="result-state" aria-live="polite">等待词语</span></header>
+<div class="output-paper"><span class="paper-clip" aria-hidden="true"></span><p class="recipe-text" aria-live="polite">从词库选择词语，再让它们在这里相遇。</p></div>
+<div class="composer-actions" aria-label="组合操作"><button data-action="another">换一种组合</button><a href="./word-bank.html">添加词语</a><button data-action="save">保存灵感</button><button data-action="develop" aria-expanded="false">继续展开</button></div>
+<div class="develop-panel" hidden><strong>下一步</strong><p>把这句话当作草图：接下来可以记录构图、材质与光线。完整的开发工具将在下一阶段开放。</p></div><p class="aside-message" aria-live="polite"></p>
+</section>
+<section class="tray-footer" aria-label="已选词托盘"><div><span>已选词托盘</span></div><div class="tray-mini ingredient-tray"></div><button class="clear-ingredients">清空</button></section>
+</main><footer class="site-footer">WORD MACHINE · 视觉构想工作台 · <span class="year"></span></footer><div class="toast" role="status" aria-live="polite"></div><script type="module" src="./js/machine.js"></script>
 </body></html>
