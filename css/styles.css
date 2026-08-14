@@ -107,6 +107,9 @@ h1, h2, h3, p { letter-spacing: 0; }
 .output-paper::after { content: "构想"; position: absolute; right: 22px; bottom: 18px; width: 45px; height: 45px; border: 1px solid #9b463b77; border-radius: 50%; color: #9b463b99; font-size: var(--type-meta); display: grid; place-content: center; transform: rotate(-8deg); }
 .paper-clip { position: absolute; z-index: 2; top: -10px; left: 48%; width: 42px; height: 18px; border: 1px solid #69696199; border-radius: 8px 8px 0 0; transform: rotate(3deg); }
 .recipe-text { position: relative; z-index: 1; max-width: 625px; margin: 0; font-size: var(--type-section-title); line-height: 1.95; }
+.completion-hints { position: relative; z-index: 1; margin-top: 22px; max-width: 625px; padding-top: 14px; border-top: 1px dashed #68696155; color: var(--muted); font-size: var(--type-meta); line-height: 1.65; }
+.completion-hints strong { color: var(--ink); font-weight: 600; }
+.completion-hints ul { margin: 7px 0 0; padding-left: 18px; }
 .recipe-text.result-enter { animation: result-in .42s ease-out; }
 @keyframes result-in { from { opacity: 0; transform: translateY(8px); } }
 .composer-actions { margin-top: 15px; display: flex; justify-content: center; flex-wrap: wrap; gap: 7px; }

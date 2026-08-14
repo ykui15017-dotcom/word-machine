@@ -15,4 +15,15 @@ const vocabulary={
 
 const tagRules={container:['hollow','fillable','overflowable'],organic_matter:['organic','trace'],life:['living'],action:['temporal'],state:['property'],relation:['multi-entity'],visual:['viewing-condition'],scale:['quantity-scale']};
 const specialTags={'蜘蛛':['thread','fragile'],'糖罐':['rigid'],'蘑菇':['growth','cluster','soft-organic'],'弹簧':['elastic','compression','extension'],'残胶':['detail','trace','surface','adhesive'],'玻璃':['transparent','rigid'],'水':['fluid','reflective'],'墙角':['structure','boundary'],'门缝':['structure','threshold']};
-export const CORE_WORDS=Object.entries(vocabulary).flatMap(([category,texts])=>texts.map((text,index)=>({id:`v2_${category}_${String(index+1).padStart(3,'0')}`,text,category,tags:[...(tagRules[category]||[]),...(specialTags[text]||[])],source:'core-v2',weight:1})));
+const sentenceRoleFor=(category,text)=>{
+  if(category==='space')return 'setting';
+  if(category==='container')return 'container';
+  if(category==='state')return 'modifier_state';
+  if(category==='action')return /散开|铺开|零散分布|形成拖尾/.test(text)?'result':'secondary_action';
+  if(category==='relation')return /从|沿|顺着|向外/.test(text)?'path':/放置|堆积|卡在|贴附|悬挂|包裹|沉在|夹在/.test(text)?'placement':'relation';
+  if(category==='visual')return /俯视|平视|机位|特写|景深/.test(text)?'perspective':'light';
+  if(category==='scale')return /铺满|散|分布|拖尾/.test(text)?'result':'visual_detail';
+  if(category==='material')return 'visual_detail';
+  return 'subject';
+};
+export const CORE_WORDS=Object.entries(vocabulary).flatMap(([category,texts])=>texts.map((text,index)=>{const sentenceRole=sentenceRoleFor(category,text);return {id:`v2_${category}_${String(index+1).padStart(3,'0')}`,text,category,sentenceRole,syntaxRole:sentenceRole,tags:[...(tagRules[category]||[]),...(specialTags[text]||[])],source:'core-v2',weight:1}}));
