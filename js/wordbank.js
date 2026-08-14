@@ -4,10 +4,24 @@ import {initNav,escapeHtml} from './common.js';
 
 initNav();
 const filters=document.querySelector('.filters'),list=document.querySelector('.word-list'),input=document.querySelector('.search'),count=document.querySelector('.bank-count');
+const guide=document.querySelector('.intent-guide');
+const intent=new URLSearchParams(location.search).get('intent');
+const intentConfig={
+  path:{label:'路径 / 出口',description:'主体经过哪里、从哪里出来或沿哪里移动。',roles:['path']},
+  result:{label:'结果形态',description:'动作完成后，元素最终呈现出的空间状态。',roles:['result']}
+};
+const currentIntent=intentConfig[intent];
 let active='all';
 const labels=['all',...CATEGORIES,'my words'];
 filters.innerHTML=labels.map((x,i)=>`<button class="filter ${i?'':'active'}" data-cat="${x.replace(' ','-')}">${CATEGORY_LABELS[x]||x.toUpperCase()}</button>`).join('');
 const allWords=()=>[...BASE_WORDS,...getMyWords()];
+const roleOf=word=>word.syntaxRole||word.sentenceRole||word.role;
+const matchesIntent=word=>!currentIntent||currentIntent.roles.includes(roleOf(word))||word.tags?.some(tag=>currentIntent.roles.includes(tag));
+
+if(currentIntent){
+  guide.hidden=false;
+  guide.innerHTML=`<span>YOU ARE LOOKING FOR</span><strong>${escapeHtml(currentIntent.label)}</strong><p>${escapeHtml(currentIntent.description)}</p><a href="./index.html">← BACK TO MACHINE</a>`;
+}
 
 function renderDock(){
   const chosen=getIngredients(),dock=document.querySelector('.dock-ingredients');
@@ -15,7 +29,7 @@ function renderDock(){
 }
 function render(){
   const q=input.value.trim().toLowerCase(),chosen=new Set(getIngredients().map(word=>word.id));
-  const shown=allWords().filter(w=>(active==='all'||(active==='my-words'?w.source==='user':w.category===active))&&(!q||[w.text,w.category,...w.tags].join(' ').toLowerCase().includes(q)));
+  const shown=allWords().filter(w=>matchesIntent(w)&&(active==='all'||(active==='my-words'?w.source==='user':w.category===active))&&(!q||[w.text,w.category,...w.tags].join(' ').toLowerCase().includes(q)));
   count.textContent=`${shown.length} VISUAL UNITS`;
   list.innerHTML=shown.slice(0,300).map(w=>`<article class="bank-word"><span class="word-index">${escapeHtml(w.text)}</span><span class="category">${escapeHtml(w.category.toUpperCase())}</span><button class="add-machine ${chosen.has(w.id)?'added':''}" data-id="${escapeHtml(w.id)}">${chosen.has(w.id)?'✓ IN MACHINE':'+ ADD TO MACHINE'}</button></article>`).join('')+(shown.length>300?'<p class="empty">继续输入关键词以缩小结果。</p>':'');
   renderDock();

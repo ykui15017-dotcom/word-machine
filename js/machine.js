@@ -2,7 +2,7 @@ import {composeIngredients,normalizeIngredient,ROLE_LABELS,SCENE_ROLES} from './
 import {supplementMissing,replaceRandom,fullRandom,inspectMachine} from './machine-logic.js';
 import {saveDrop,setMachineState,getMachineState,getIngredients,setIngredients,setIngredientRole,toggleIngredientLock,clearRandomIngredients,removeIngredient,clearIngredients} from './storage.js';
 import {initNav,escapeHtml} from './common.js';
-import {formatResultState} from './result-state.js';
+import {formatResultState,missingResultRoles} from './result-state.js';
 
 initNav();
 const idea=document.querySelector('.recipe-text');
@@ -14,6 +14,22 @@ let variation=0;
 let hasResult=false;
 let messageTimer;
 let rolePopover;
+
+function renderResultState(result){
+  const text=formatResultState(result);
+  if(result.status==='ok'||result.status==='conflict'){resultState.textContent=text;return}
+  const missing=missingResultRoles(result);
+  resultState.replaceChildren(document.createTextNode('还可以补充：'));
+  missing.forEach((item,index)=>{
+    if(index)resultState.append(document.createTextNode(' · '));
+    if(!item.description){resultState.append(document.createTextNode(item.label));return}
+    const link=document.createElement('a');
+    link.className='completion-link';link.href=`./word-bank.html?intent=${encodeURIComponent(item.role)}`;
+    link.textContent=item.label;link.dataset.tooltip=`${item.description} 例如：${item.examples.join('、')}`;
+    link.setAttribute('aria-label',`${item.label}：${link.dataset.tooltip}`);
+    resultState.append(link);
+  });
+}
 
 const ingredientKey=items=>items.map(item=>`${item.id}:${item.userRoleOverride||''}:${item.source||'manual'}:${Boolean(item.locked)}`).join('|');
 const savedState=getMachineState();
@@ -55,7 +71,7 @@ function refreshDraft(){
   if(!ingredients.length)return;
   const result=composeIngredients(ingredients,variation);
   idea.textContent=result.draftText||result.nextSuggestion;
-  resultState.textContent=formatResultState(result);
+  renderResultState(result);
   idea.dataset.status=result.status;
   hasResult=Boolean(result.draftText);
   setMachineState({composerKey:ingredientKey(ingredients),composedText:idea.textContent,variation,words:ingredients,status:result.status,warnings:result.warnings});
@@ -89,7 +105,7 @@ function compose(isAnother=false){
   const result=composeIngredients(ingredients,variation);
   idea.textContent=result.draftText||result.nextSuggestion;
   idea.classList.add('result-enter');hasResult=true;
-  resultState.textContent=formatResultState(result);
+  renderResultState(result);
   setMachineState({composerKey:ingredientKey(ingredients),composedText:idea.textContent,variation,words:ingredients,status:result.status,warnings:result.warnings});
   say(isAnother?'表达已改写；原词保持不变。':'组合完成。');
 }

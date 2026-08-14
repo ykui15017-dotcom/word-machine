@@ -104,6 +104,10 @@ h1, h2, h3, p { letter-spacing: 0; }
 .composer-output > header { padding: 0 13px 11px; display: flex; align-items: center; justify-content: space-between; }
 .composer-output > header h2 { margin: 0; font: 600 var(--type-section-title)/1.4 var(--font-zh); }
 .result-state { color: var(--muted); font-size: var(--type-meta); }
+.completion-link { position: relative; color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; text-decoration-color: #77776f88; }
+.completion-link:hover, .completion-link:focus-visible { color: var(--red); }
+.completion-link::after { content: attr(data-tooltip); position: absolute; z-index: 20; top: calc(100% + 8px); right: 0; width: 260px; padding: 9px 11px; border: 1px solid #57584f88; border-radius: 3px; background: #faf6ec; box-shadow: 3px 5px 12px #292a2626; color: var(--ink); font: var(--type-meta)/1.6 var(--font-zh); text-align: left; pointer-events: none; opacity: 0; transform: translateY(-3px); transition: opacity .15s, transform .15s; }
+.completion-link:hover::after, .completion-link:focus-visible::after { opacity: 1; transform: translateY(0); }
 .output-paper { position: relative; min-height: 180px; padding: 44px 56px 38px; border: 1px solid #56574f99; background: linear-gradient(#fff6, transparent), radial-gradient(#37352e0c .5px, transparent .7px) 0 0 / 8px 8px, #faf6ec; box-shadow: 3px 5px 0 #34352f0b; transform: rotate(.15deg); }
 .output-paper::before { content: ""; position: absolute; inset: 11px; border: 1px solid #68696120; }
 .output-paper::after { content: "构想"; position: absolute; right: 22px; bottom: 18px; width: 45px; height: 45px; border: 1px solid #9b463b77; border-radius: 50%; color: #9b463b99; font-size: var(--type-meta); display: grid; place-content: center; transform: rotate(-8deg); }
@@ -138,6 +142,12 @@ h1, h2, h3, p { letter-spacing: 0; }
 .filter { padding: 7px 11px; border: 1px solid var(--line); border-radius: 20px; background: none; color: var(--muted); font-size: var(--type-body); letter-spacing: .04em; cursor: pointer; }
 .filter.active { border-color: #7c8875; background: var(--sage); color: white; }
 .archive-rule { padding-bottom: 12px; border-bottom: 1px solid #353630; display: flex; justify-content: space-between; }
+.intent-guide { position: relative; margin: 0 0 28px; padding: 17px 20px; border-left: 2px solid var(--red); background: #faf6ec; }
+.intent-guide span, .intent-guide strong { display: block; }
+.intent-guide span { color: var(--muted); font: var(--type-meta)/1.4 var(--font-en); letter-spacing: .09em; }
+.intent-guide strong { margin-top: 4px; font-size: var(--type-section-title); }
+.intent-guide p { margin: 5px 140px 0 0; color: var(--muted); font-size: var(--type-body); }
+.intent-guide a { position: absolute; right: 20px; bottom: 18px; color: var(--red); font-size: var(--type-meta); text-decoration: none; }
 .archive-rule strong { font: 600 var(--type-section-title)/1.4 var(--font-zh); letter-spacing: .04em; }
 .bank-count { margin-bottom: 10px; color: var(--muted); font-size: var(--type-meta); }
 .word-list { width: 100%; }
