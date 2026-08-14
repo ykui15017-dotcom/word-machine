@@ -11,11 +11,14 @@ export const saveDrop=drop=>{const saved=getSaved();saved.unshift({...drop,id:`s
 export const removeSaved=id=>write(KEYS.saved,getSaved().filter(x=>x.id!==id));
 export const getMachineState=()=>read(KEYS.machine,null);
 export const setMachineState=state=>write(KEYS.machine,state);
-export const getIngredients=()=>read(KEYS.ingredients).map(migrateWord);
-export const setIngredients=ingredients=>write(KEYS.ingredients,ingredients);
-export const addIngredient=word=>{const ingredients=getIngredients();if(!ingredients.some(item=>item.id===word.id))ingredients.push(word);setIngredients(ingredients);return ingredients};
+const normalizeIngredientSource=word=>({...word,source:word.source==='random'?'random':'manual',locked:word.locked??word.source!=='random'});
+export const getIngredients=()=>read(KEYS.ingredients).map(migrateWord).map(normalizeIngredientSource);
+export const setIngredients=ingredients=>write(KEYS.ingredients,ingredients.map(normalizeIngredientSource));
+export const addIngredient=word=>{const ingredients=getIngredients();if(ingredients.length<5&&!ingredients.some(item=>item.id===word.id))ingredients.push(normalizeIngredientSource({...word,source:'manual',locked:true}));setIngredients(ingredients);return ingredients};
 export const removeIngredient=id=>{const ingredients=getIngredients().filter(item=>item.id!==id);setIngredients(ingredients);return ingredients};
 export const clearIngredients=()=>setIngredients([]);
 export const setIngredientRole=(id,userRoleOverride)=>{const ingredients=getIngredients().map(item=>item.id===id?{...item,userRoleOverride:userRoleOverride||null}:item);setIngredients(ingredients);return ingredients};
+export const toggleIngredientLock=id=>{const ingredients=getIngredients().map(item=>item.id===id?{...item,locked:!item.locked}:item);setIngredients(ingredients);return ingredients};
+export const clearRandomIngredients=()=>{const ingredients=getIngredients().filter(item=>item.source!=='random');setIngredients(ingredients);return ingredients};
 export const putOnMachine=word=>{sessionStorage.setItem('wm-incoming',JSON.stringify(word));location.href='./index.html'};
 export const takeIncoming=()=>{try{const x=JSON.parse(sessionStorage.getItem('wm-incoming'));sessionStorage.removeItem('wm-incoming');return x}catch{return null}};
