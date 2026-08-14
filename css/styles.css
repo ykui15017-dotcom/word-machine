@@ -64,9 +64,13 @@ h1, h2, h3, p { letter-spacing: 0; }
 .ingredient:nth-child(4n) i { background: var(--yellow); }
 .ingredient b { overflow-wrap: anywhere; font-size: var(--type-body); font-weight: 500; }
 .ingredient small { margin-top: 3px; color: var(--muted); font-size: var(--type-meta); }
-.role-control { margin-top: 5px; }
-.role-control select { max-width: 92px; padding: 1px 14px 1px 4px; border: 0; border-bottom: 1px dotted #77776f; background: transparent; color: var(--muted); font: 11px/1.4 var(--font-cn); cursor: pointer; }
-.ingredient button, .dock-card button { position: absolute; top: 0; right: 3px; border: 0; background: none; color: var(--muted); cursor: pointer; }
+.role-trigger { align-self: center; margin-top: 4px; padding: 0 2px; border: 0; border-bottom: 1px dotted #77776f88; background: none; color: var(--muted); font: 11px/1.45 var(--font-zh); cursor: pointer; }
+.role-trigger span { margin-left: 2px; font-size: 8px; }
+.ingredient .ingredient-remove, .dock-card button { position: absolute; top: 0; right: 3px; border: 0; background: none; color: var(--muted); cursor: pointer; }
+.role-popover { position: fixed; z-index: 30; width: 112px; padding: 5px; border: 1px solid #57584f88; border-radius: 3px; background: #faf6ec; box-shadow: 3px 5px 12px #292a2626; }
+.role-popover button { width: 100%; padding: 4px 7px; border: 0; background: transparent; color: var(--muted); font: 12px/1.35 var(--font-zh); text-align: left; cursor: pointer; }
+.role-popover button:hover, .role-popover button:focus-visible { outline: 0; background: #ebe5d8; color: var(--ink); }
+.role-popover button[aria-checked="true"] { color: var(--ink); font-weight: 600; }
 .empty-slot { width: 112px; height: 88px; border: 1px dashed #77776f; background: #faf6ecaa; color: var(--ink); font-size: var(--type-section-title); text-align: center; text-decoration: none; display: grid; place-content: center; transform: rotate(-1deg); }
 .empty-slot small { display: block; font-size: var(--type-meta); }
 .desk-surface > .sketch-link { position: absolute; z-index: 5; top: 76px; right: 36px; padding: 4px 1px; border-bottom: 1px solid var(--red); color: var(--ink); font-size: var(--type-body); text-decoration: none; }
@@ -116,7 +120,7 @@ h1, h2, h3, p { letter-spacing: 0; }
 .tray-footer > div:first-child span { font-size: var(--type-body); }
 .tray-mini { min-width: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .tray-mini .ingredient { width: auto; min-width: 55px; min-height: 34px; padding: 5px 15px 4px 8px; transform: none; }
-.tray-mini .ingredient::before, .tray-mini .ingredient i, .tray-mini .ingredient small, .tray-mini .role-control { display: none; }
+.tray-mini .ingredient::before, .tray-mini .ingredient i, .tray-mini .ingredient small, .tray-mini .role-trigger { display: none; }
 .tray-mini .ingredient b { font-size: var(--type-body); }
 .clear-ingredients { border: 0; background: none; color: var(--muted); font-size: var(--type-body); cursor: pointer; }
 
@@ -278,7 +282,7 @@ h1, h2, h3, p { letter-spacing: 0; }
 .ingredient-rail { position: absolute; z-index: 5; top: 22px; left: 28px; right: 28px; min-width: 0; }
 .ingredient-rail h2 { margin: 0 0 10px; font: 600 var(--type-section-title)/1.4 var(--font-zh); }
 .composer-ingredients { position: static; min-height: 90px; min-width: 0; padding: 3px 0 10px; overflow-x: auto; overflow-y: hidden; display: flex; flex-wrap: nowrap; align-items: flex-start; gap: 10px; scrollbar-width: thin; }
-.composer-ingredients .ingredient { flex: 0 0 104px; width: 104px; min-height: 78px; padding: 13px 9px 9px; transform: none; }
+.composer-ingredients .ingredient { flex: 0 0 104px; width: 104px; height: 76px; min-height: 0; padding: 11px 9px 7px; transform: none; }
 .ingredient-rail .sketch-link { position: absolute; top: 0; right: 0; padding-bottom: 2px; border-bottom: 1px solid var(--red); color: var(--ink); font-size: var(--type-body); text-decoration: none; }
 .desk-lip { top: 150px; }
 .desk-surface::before { inset: 156px 23px 24px; }
