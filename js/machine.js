@@ -1,6 +1,6 @@
 import {composeIngredients,normalizeIngredient,ROLE_LABELS,SCENE_ROLES} from './ingredient-composer.js';
-import {completeConstrainedIngredients} from './constrained-drop.js';
-import {saveDrop,setMachineState,getMachineState,getIngredients,setIngredients,setIngredientRole,removeIngredient,clearIngredients} from './storage.js';
+import {supplementMissing,replaceRandom,fullRandom,inspectMachine} from './machine-logic.js';
+import {saveDrop,setMachineState,getMachineState,getIngredients,setIngredients,setIngredientRole,toggleIngredientLock,clearRandomIngredients,removeIngredient,clearIngredients} from './storage.js';
 import {initNav,escapeHtml} from './common.js';
 
 initNav();
@@ -15,7 +15,7 @@ let hasResult=false;
 let messageTimer;
 let rolePopover;
 
-const ingredientKey=items=>items.map(item=>`${item.id}:${item.userRoleOverride||''}`).join('|');
+const ingredientKey=items=>items.map(item=>`${item.id}:${item.userRoleOverride||''}:${item.source||'manual'}:${Boolean(item.locked)}`).join('|');
 const savedState=getMachineState();
 if(savedState?.composerKey===ingredientKey(getIngredients())&&savedState.composedText){
   idea.textContent=savedState.composedText;
@@ -27,7 +27,8 @@ if(savedState?.composerKey===ingredientKey(getIngredients())&&savedState.compose
 function ingredientCard(word,compact=false){
   const normalized=normalizeIngredient(word);
   const roleControl=compact?'':`<button class="role-trigger" data-role-trigger="${escapeHtml(word.id)}" aria-haspopup="menu" aria-expanded="false">${ROLE_LABELS[normalized.finalRole]}<span aria-hidden="true">▾</span></button>`;
-  return `<span class="ingredient ${compact?'compact':''}"><i class="category-${escapeHtml(word.category)}"></i><b>${escapeHtml(word.text)}</b>${roleControl}<button class="ingredient-remove" data-remove="${escapeHtml(word.id)}" aria-label="删除 ${escapeHtml(word.text)}">×</button></span>`;
+  const lockControl=compact?'':`<button class="ingredient-lock" data-lock="${escapeHtml(word.id)}" aria-label="${word.locked?'解锁':'锁定'} ${escapeHtml(word.text)}" aria-pressed="${Boolean(word.locked)}">${word.locked?'🔒':'♢'}</button>`;
+  return `<span class="ingredient ${compact?'compact':''}" data-source="${word.source}"><i class="category-${escapeHtml(word.category)}"></i><b>${escapeHtml(word.text)}</b>${roleControl}${lockControl}<button class="ingredient-remove" data-remove="${escapeHtml(word.id)}" aria-label="删除 ${escapeHtml(word.text)}">×</button></span>`;
 }
 function closeRolePopover(){
   if(!rolePopover)return;
@@ -80,6 +81,10 @@ function spinDial(){
 function compose(isAnother=false){
   const ingredients=getIngredients();
   if(!ingredients.length){say('请先从词库添加词语。');return}
+  const structure=inspectMachine(ingredients);
+  if(!structure.hasSubject){say('还缺少主体，请先补入画面的主角。');resultState.textContent='缺少主体';return}
+  if(!structure.hasSupport){say('还缺少场域/容器或动作/路径。');resultState.textContent='缺少场域或动作';return}
+  if(ingredients.length<3){say('当前少于 3 张词卡，建议先补足结构再生成完整视觉构想。');return}
   variation=isAnother?variation+1:hasResult?variation+1:0;
   idea.classList.remove('result-enter');void idea.offsetWidth;
   const result=composeIngredients(ingredients,variation);
@@ -107,15 +112,22 @@ document.addEventListener('click',event=>{
   closeRolePopover();
   const remove=event.target.closest('[data-remove]');
   if(remove){removeIngredient(remove.dataset.remove);hasResult=false;renderTray();say('已移除词语。');return}
+  const lock=event.target.closest('[data-lock]');
+  if(lock){toggleIngredientLock(lock.dataset.lock);renderTray();say('词卡锁定状态已更新。');return}
   if(event.target.closest('.clear-ingredients')){clearIngredients();hasResult=false;renderTray();say('已清空词卡托盘。');return}
   const control=event.target.closest('[data-action]');
   const action=control?.dataset.action;
-  if(action==='random'){
+  if(action==='supplement'){
     const current=getIngredients();
-    setIngredients(completeConstrainedIngredients(current));
+    if(current.length>=5){say('当前结构已完整，可换随机词或继续展开');return}
+    setIngredients(supplementMissing(current));
     hasResult=false;renderTray();
-    say(current.length&&current.length<5?'已保留现有词语，并补成一组视觉元素。':'已随机掉落一组视觉元素。');
+    const complete=inspectMachine(getIngredients()).missing.length===0;
+    say(complete?'当前组合结构已基本完整，可换随机词、继续展开，或保存灵感。':current.some(word=>word.source==='manual')?'已检测到手动选词，随机功能将只补足缺失类别。':'已补足当前缺失类别。');
   }
+  if(action==='replace-random'){setIngredients(replaceRandom(getIngredients()));hasResult=false;renderTray();say('已替换随机词，手动词保持不变。')}
+  if(action==='full-random'){setIngredients(fullRandom());hasResult=false;renderTray();say('已清空原组合并生成完整随机结构。')}
+  if(action==='clear-random'){clearRandomIngredients();hasResult=false;renderTray();say('已清除随机词。')}
   if(action==='compose'){spinDial();compose(false)}
   if(action==='another'){spinDial();compose(true)}
   if(action==='save'){

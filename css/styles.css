@@ -67,6 +67,8 @@ h1, h2, h3, p { letter-spacing: 0; }
 .role-trigger { align-self: center; margin-top: 4px; padding: 0 2px; border: 0; border-bottom: 1px dotted #77776f88; background: none; color: var(--muted); font: 11px/1.45 var(--font-zh); cursor: pointer; }
 .role-trigger span { margin-left: 2px; font-size: 8px; }
 .ingredient .ingredient-remove, .dock-card button { position: absolute; top: 0; right: 3px; border: 0; background: none; color: var(--muted); cursor: pointer; }
+.ingredient .ingredient-lock { position: absolute; left: 3px; top: 1px; padding: 0; border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 11px; }
+.ingredient[data-source="manual"] { border-style: solid; }
 .role-popover { position: fixed; z-index: 30; width: 112px; padding: 5px; border: 1px solid #57584f88; border-radius: 3px; background: #faf6ec; box-shadow: 3px 5px 12px #292a2626; }
 .role-popover button { width: 100%; padding: 4px 7px; border: 0; background: transparent; color: var(--muted); font: 12px/1.35 var(--font-zh); text-align: left; cursor: pointer; }
 .role-popover button:hover, .role-popover button:focus-visible { outline: 0; background: #ebe5d8; color: var(--ink); }
@@ -331,6 +333,7 @@ h1, h2, h3, p { letter-spacing: 0; }
 
 /* Random drop is a quiet utility inside the original ingredient rail. */
 .ingredient-actions { position: absolute; top: -2px; right: 0; display: flex; align-items: center; gap: 13px; }
+.ingredient-actions button { border: 0; background: none; color: inherit; cursor: pointer; }
 .ingredient-rail .ingredient-actions .sketch-link { position: static; }
 .random-drop { min-height: 30px; padding: 5px 11px; border: 1px dashed #77776f; border-radius: 3px; background: #f8f3e8; color: var(--ink); font: 500 12px/1 var(--font-cn); cursor: pointer; }
 .random-drop:hover { border-color: var(--red); color: var(--red); transform: rotate(-1deg); }

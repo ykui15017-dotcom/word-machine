@@ -8,7 +8,7 @@
 <section class="composer-workbench" aria-label="视觉关系工作台">
 <div class="desk-surface">
 <div class="desk-lip" aria-hidden="true"></div>
-<div class="ingredient-rail"><h2>已选元素</h2><div class="composer-ingredients ingredient-tray" aria-label="已选元素"></div><div class="ingredient-actions"><button class="random-drop" data-action="random">随机掉落</button><a class="sketch-link" href="./word-bank.html">＋ 加入元素</a></div></div>
+<div class="ingredient-rail"><h2>已选元素</h2><div class="composer-ingredients ingredient-tray" aria-label="已选元素"></div><div class="ingredient-actions"><button class="random-drop" data-action="supplement">补足缺失</button><button data-action="replace-random">换随机词</button><button data-action="full-random">全随机</button><a class="sketch-link" href="./word-bank.html">＋ 加入元素</a></div></div>
 <div class="dial-area" aria-hidden="true"><span>关系转盘</span><div class="composition-dial"><div class="dial-rotor"><i></i><i></i><i></i></div><b></b></div></div>
 <div class="desk-control" aria-hidden="true"><i><b></b></i></div>
 <button class="compose-trigger" data-action="compose"><span>COMPOSE</span></button>
@@ -19,6 +19,6 @@
 <div class="composer-actions" aria-label="组合操作"><button data-action="another">换一种组合</button><a href="./word-bank.html">添加词语</a><button data-action="save">保存灵感</button><button data-action="develop" aria-expanded="false">继续展开</button></div>
 <div class="develop-panel" hidden><strong>下一步</strong><p>把这句话当作草图：接下来可以记录构图、材质与光线。完整的开发工具将在下一阶段开放。</p></div><p class="aside-message" aria-live="polite"></p>
 </section>
-<section class="tray-footer" aria-label="已选词托盘"><div><span>已选词托盘</span></div><div class="tray-mini ingredient-tray"></div><button class="clear-ingredients">清空</button></section>
+<section class="tray-footer" aria-label="已选词托盘"><div><span>已选词托盘</span></div><div class="tray-mini ingredient-tray"></div><button data-action="clear-random">清除随机词</button><button class="clear-ingredients">清空全部</button></section>
 </main><footer class="site-footer">WORD MACHINE · 视觉构想工作台 · <span class="year"></span></footer><div class="toast" role="status" aria-live="polite"></div><script type="module" src="./js/machine.js"></script>
 </body></html>
