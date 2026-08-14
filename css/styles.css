@@ -64,6 +64,8 @@ h1, h2, h3, p { letter-spacing: 0; }
 .ingredient:nth-child(4n) i { background: var(--yellow); }
 .ingredient b { overflow-wrap: anywhere; font-size: var(--type-body); font-weight: 500; }
 .ingredient small { margin-top: 3px; color: var(--muted); font-size: var(--type-meta); }
+.role-control { margin-top: 5px; }
+.role-control select { max-width: 92px; padding: 1px 14px 1px 4px; border: 0; border-bottom: 1px dotted #77776f; background: transparent; color: var(--muted); font: 11px/1.4 var(--font-cn); cursor: pointer; }
 .ingredient button, .dock-card button { position: absolute; top: 0; right: 3px; border: 0; background: none; color: var(--muted); cursor: pointer; }
 .empty-slot { width: 112px; height: 88px; border: 1px dashed #77776f; background: #faf6ecaa; color: var(--ink); font-size: var(--type-section-title); text-align: center; text-decoration: none; display: grid; place-content: center; transform: rotate(-1deg); }
 .empty-slot small { display: block; font-size: var(--type-meta); }
@@ -114,7 +116,7 @@ h1, h2, h3, p { letter-spacing: 0; }
 .tray-footer > div:first-child span { font-size: var(--type-body); }
 .tray-mini { min-width: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .tray-mini .ingredient { width: auto; min-width: 55px; min-height: 34px; padding: 5px 15px 4px 8px; transform: none; }
-.tray-mini .ingredient::before, .tray-mini .ingredient i, .tray-mini .ingredient small { display: none; }
+.tray-mini .ingredient::before, .tray-mini .ingredient i, .tray-mini .ingredient small, .tray-mini .role-control { display: none; }
 .tray-mini .ingredient b { font-size: var(--type-body); }
 .clear-ingredients { border: 0; background: none; color: var(--muted); font-size: var(--type-body); cursor: pointer; }
 

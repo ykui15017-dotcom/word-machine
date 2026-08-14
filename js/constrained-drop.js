@@ -14,10 +14,10 @@ const uniquePush=(result,word)=>{if(word&&!result.some(item=>item.id===word.id))
 // These are scene rhythms rather than a mandatory category checklist. Some
 // drops lean on two visible subjects, while others emphasize action or view.
 const MACHINE_STRUCTURES=[
-  ['subject','space','relation','condition','view'],
-  ['subject','subject','relation','condition','view'],
-  ['subject','space','relation','relation','view'],
-  ['subject','subject','space','relation','condition']
+  ['subject','space','relation','subject','view'],
+  ['subject','space','relation','condition','subject'],
+  ['subject','space','relation','subject','condition'],
+  ['subject','space','relation','subject','view']
 ];
 
 /** Preserve up to three hand-picked words and complete them into a scene. */

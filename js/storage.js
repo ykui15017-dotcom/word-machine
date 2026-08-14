@@ -16,5 +16,6 @@ export const setIngredients=ingredients=>write(KEYS.ingredients,ingredients);
 export const addIngredient=word=>{const ingredients=getIngredients();if(!ingredients.some(item=>item.id===word.id))ingredients.push(word);setIngredients(ingredients);return ingredients};
 export const removeIngredient=id=>{const ingredients=getIngredients().filter(item=>item.id!==id);setIngredients(ingredients);return ingredients};
 export const clearIngredients=()=>setIngredients([]);
+export const setIngredientRole=(id,userRoleOverride)=>{const ingredients=getIngredients().map(item=>item.id===id?{...item,userRoleOverride:userRoleOverride||null}:item);setIngredients(ingredients);return ingredients};
 export const putOnMachine=word=>{sessionStorage.setItem('wm-incoming',JSON.stringify(word));location.href='./index.html'};
 export const takeIncoming=()=>{try{const x=JSON.parse(sessionStorage.getItem('wm-incoming'));sessionStorage.removeItem('wm-incoming');return x}catch{return null}};
