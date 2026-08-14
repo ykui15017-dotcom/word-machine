@@ -12,6 +12,7 @@ const compositionDial=document.querySelector('.composition-dial');
 let variation=0;
 let hasResult=false;
 let messageTimer;
+let rolePopover;
 
 const ingredientKey=items=>items.map(item=>`${item.id}:${item.userRoleOverride||''}`).join('|');
 const savedState=getMachineState();
@@ -24,8 +25,28 @@ if(savedState?.composerKey===ingredientKey(getIngredients())&&savedState.compose
 
 function ingredientCard(word,compact=false){
   const normalized=normalizeIngredient(word);
-  const roleOptions=SCENE_ROLES.map(role=>`<option value="${role}" ${normalized.finalRole===role?'selected':''}>${ROLE_LABELS[role]}</option>`).join('');
-  return `<span class="ingredient ${compact?'compact':''}"><i class="category-${escapeHtml(word.category)}"></i><b>${escapeHtml(word.text)}</b><label class="role-control"><span class="sr-only">调整 ${escapeHtml(word.text)} 的角色</span><select data-role-for="${escapeHtml(word.id)}" title="调整词语角色">${roleOptions}</select></label><button data-remove="${escapeHtml(word.id)}" aria-label="删除 ${escapeHtml(word.text)}">×</button></span>`;
+  const roleControl=compact?'':`<button class="role-trigger" data-role-trigger="${escapeHtml(word.id)}" aria-haspopup="menu" aria-expanded="false">${ROLE_LABELS[normalized.finalRole]}<span aria-hidden="true">▾</span></button>`;
+  return `<span class="ingredient ${compact?'compact':''}"><i class="category-${escapeHtml(word.category)}"></i><b>${escapeHtml(word.text)}</b>${roleControl}<button class="ingredient-remove" data-remove="${escapeHtml(word.id)}" aria-label="删除 ${escapeHtml(word.text)}">×</button></span>`;
+}
+function closeRolePopover(){
+  if(!rolePopover)return;
+  document.querySelector(`[data-role-trigger="${CSS.escape(rolePopover.dataset.wordId)}"]`)?.setAttribute('aria-expanded','false');
+  rolePopover.remove();rolePopover=null;
+}
+function openRolePopover(trigger){
+  closeRolePopover();
+  const word=getIngredients().find(item=>item.id===trigger.dataset.roleTrigger);
+  if(!word)return;
+  const selectedRole=normalizeIngredient(word).finalRole;
+  rolePopover=document.createElement('div');
+  rolePopover.className='role-popover';rolePopover.setAttribute('role','menu');rolePopover.dataset.wordId=word.id;
+  rolePopover.innerHTML=SCENE_ROLES.map(role=>`<button role="menuitemradio" aria-checked="${role===selectedRole}" data-role-choice="${role}">${ROLE_LABELS[role]}</button>`).join('');
+  document.body.append(rolePopover);
+  const rect=trigger.getBoundingClientRect();
+  rolePopover.style.left=`${Math.min(rect.left,window.innerWidth-rolePopover.offsetWidth-8)}px`;
+  rolePopover.style.top=`${rect.bottom+5}px`;
+  trigger.setAttribute('aria-expanded','true');
+  rolePopover.querySelector('[aria-checked="true"]')?.focus();
 }
 function refreshDraft(label='结构已更新'){
   const ingredients=getIngredients();
@@ -68,6 +89,19 @@ function compose(isAnother=false){
 }
 
 document.addEventListener('click',event=>{
+  const roleChoice=event.target.closest('[data-role-choice]');
+  if(roleChoice){
+    const wordId=rolePopover?.dataset.wordId;
+    const role=roleChoice.dataset.roleChoice;
+    closeRolePopover();setIngredientRole(wordId,role);
+    variation=0;hasResult=false;renderTray();say(`已将词语设为${ROLE_LABELS[role]}。`);return;
+  }
+  const roleTrigger=event.target.closest('[data-role-trigger]');
+  if(roleTrigger){
+    if(rolePopover?.dataset.wordId===roleTrigger.dataset.roleTrigger)closeRolePopover();else openRolePopover(roleTrigger);
+    return;
+  }
+  closeRolePopover();
   const remove=event.target.closest('[data-remove]');
   if(remove){removeIngredient(remove.dataset.remove);hasResult=false;renderTray();say('已移除词语。');return}
   if(event.target.closest('.clear-ingredients')){clearIngredients();hasResult=false;renderTray();say('已清空词卡托盘。');return}
@@ -90,10 +124,12 @@ document.addEventListener('click',event=>{
     say(opening?'已打开下一阶段说明。':'已收起开发说明。');
   }
 });
-document.addEventListener('change',event=>{
-  const select=event.target.closest('[data-role-for]');
-  if(!select)return;
-  setIngredientRole(select.dataset.roleFor,select.value);
-  variation=0;hasResult=false;renderTray();say(`已将词语设为${ROLE_LABELS[select.value]}。`);
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&rolePopover){
+    const wordId=rolePopover.dataset.wordId;
+    closeRolePopover();document.querySelector(`[data-role-trigger="${CSS.escape(wordId)}"]`)?.focus();
+  }
 });
+window.addEventListener('resize',closeRolePopover);
+window.addEventListener('scroll',closeRolePopover,true);
 renderTray();
