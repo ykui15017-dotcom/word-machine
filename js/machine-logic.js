@@ -1,5 +1,6 @@
 import {ELIGIBLE_RANDOM_WORDS} from '../data/constrained-random-pool.js';
-import {normalizeIngredient} from './ingredient-composer.js';
+import {normalizeIngredient,composeIngredients} from './ingredient-composer.js';
+import {missingResultRoles} from './result-state.js';
 
 export const MACHINE_LIMIT=5;
 export const STRUCTURE=[
@@ -16,20 +17,51 @@ const randomFor=(slot,current,rng)=>{
   const ids=new Set(current.map(word=>word.id));
   return pick(ELIGIBLE_RANDOM_WORDS.filter(word=>slot.roles.includes(roleOf(word))&&!ids.has(word.id)),rng);
 };
+const randomForMissing=(missing,current,rng)=>{
+  const ids=new Set(current.map(word=>word.id));
+  const roles=missing.role==='support'?['setting','container']:[missing.role];
+  return pick(ELIGIBLE_RANDOM_WORDS.filter(word=>roles.includes(roleOf(word))&&!ids.has(word.id)),rng);
+};
 const asRandom=word=>({...word,source:'random',locked:false});
 
 export function inspectMachine(items=[]){
   const occupied=new Set(items.map(slotFor).filter(Boolean).map(slot=>slot.id));
-  return {hasSubject:occupied.has('subject'),hasSupport:occupied.has('place')||occupied.has('entry')||occupied.has('action'),missing:STRUCTURE.filter(slot=>!occupied.has(slot.id)),full:items.length>=MACHINE_LIMIT,complete:occupied.has('subject')&&(occupied.has('place')||occupied.has('entry')||occupied.has('action'))};
+  const missing=missingResultRoles(composeIngredients(items));
+  return {hasSubject:occupied.has('subject'),hasSupport:occupied.has('place')||occupied.has('entry')||occupied.has('action'),missing,full:items.length>=MACHINE_LIMIT,complete:missing.length===0};
 }
 export function supplementMissing(items=[],rng=Math.random,maxAdd=2){
   const result=items.slice(0,MACHINE_LIMIT),status=inspectMachine(result);
-  if(status.full)return result;
-  for(const slot of status.missing.slice(0,Math.min(2,maxAdd))){
+  const targets=status.missing.filter(item=>item.role==='support'||STRUCTURE.some(slot=>slot.roles.includes(item.role)));
+  if(status.full){
+    const redundant=findRedundantRandomIndex(result);
+    if(redundant<0||!targets.length)return items;
+    const word=randomForMissing(targets[0],result.filter((_,index)=>index!==redundant),rng);
+    if(!word)return items;
+    result.splice(redundant,1,asRandom(word));return result;
+  }
+  for(const target of targets.slice(0,Math.min(2,maxAdd))){
     if(result.length>=MACHINE_LIMIT)break;
-    const word=randomFor(slot,result,rng);if(word)result.push(asRandom(word));
+    const word=randomForMissing(target,result,rng);if(word)result.push(asRandom(word));
   }
   return result;
+}
+const priority=word=>STRUCTURE.findIndex(slot=>slot===slotFor(word));
+function findRedundantRandomIndex(items){
+  const counts=new Map();
+  items.forEach(word=>{const role=roleOf(word);counts.set(role,(counts.get(role)||0)+1)});
+  return items.map((word,index)=>({word,index,role:roleOf(word)}))
+    .filter(({word,role})=>word.source==='random'&&!word.locked&&((counts.get(role)||0)>1||!['subject','setting','container','placement','path','secondary_action','result'].includes(role)))
+    .sort((a,b)=>priority(b.word)-priority(a.word))[0]?.index??-1;
+}
+export function addManualToMachine(items=[],word){
+  if(items.some(item=>item.id===word.id))return {status:'exists',items};
+  const manual={...word,source:'manual',locked:true};
+  if(items.length<MACHINE_LIMIT)return {status:'added',items:[...items,manual]};
+  const replaceIndex=items.map((item,index)=>({item,index})).filter(({item})=>item.source==='random'&&!item.locked)
+    .sort((a,b)=>priority(b.item)-priority(a.item))[0]?.index;
+  if(replaceIndex===undefined)return {status:'choose',items};
+  const next=items.slice();next.splice(replaceIndex,1,manual);
+  return {status:'replaced',items:next,replaced:items[replaceIndex]};
 }
 export function replaceRandom(items=[],rng=Math.random){
   const fixed=items.filter(word=>word.source!=='random');

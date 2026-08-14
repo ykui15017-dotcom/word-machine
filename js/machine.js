@@ -25,7 +25,7 @@ function renderResultState(result){
     if(!item.description){resultState.append(document.createTextNode(item.label));return}
     const link=document.createElement('a');
     link.className='completion-link';link.href=`./word-bank.html?intent=${encodeURIComponent(item.role)}`;
-    link.textContent=item.label;link.dataset.tooltip=`${item.description} 例如：${item.examples.join('、')}`;
+    link.textContent=item.label;link.dataset.tooltip=item.description;
     link.setAttribute('aria-label',`${item.label}：${link.dataset.tooltip}`);
     resultState.append(link);
   });
@@ -133,8 +133,11 @@ document.addEventListener('click',event=>{
   const action=control?.dataset.action;
   if(action==='supplement'){
     const current=getIngredients();
-    if(current.length>=5){say('当前结构已完整，可换随机词或继续展开');return}
-    setIngredients(supplementMissing(current));
+    const before=inspectMachine(current);
+    if(!before.missing.length){say('当前结构已完整。');return}
+    const supplemented=supplementMissing(current);
+    if(current.length>=5&&supplemented===current){say(`当前词卡已满，但结构仍缺少：${before.missing.map(item=>item.label).join(' / ')}。可删除或替换一个元素。`);return}
+    setIngredients(supplemented);
     hasResult=false;renderTray();
     const complete=inspectMachine(getIngredients()).missing.length===0;
     say(complete?'当前组合结构已基本完整，可换随机词、继续展开，或保存灵感。':current.some(word=>word.source==='manual')?'已检测到手动选词，随机功能将只补足缺失类别。':'已补足当前缺失类别。');
