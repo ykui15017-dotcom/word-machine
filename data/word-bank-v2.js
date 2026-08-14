@@ -6,15 +6,16 @@ const vocabulary={
   life:split(`人 飞鸟 鸟群 鱼群 蚁群 金鱼 蜗牛 飞蛾 水母 蚂蚁 乌鸦 小狗 家猫 甲虫 蚯蚓 蜜蜂 蝴蝶 蜘蛛 壁虎 螃蟹 章鱼 海马 青蛙 蝌蚪 白兔 麻雀 燕子 蜻蜓 瓢虫 寄居蟹 河虾 刺猬 松鼠 海星 珊瑚虫 螳螂 蚕 萤火虫 海鸥 田螺 蛞蝓 毛毛虫 白鹅 鸭子 狐狸 鹿 海豹 鲸 竹节虫 蟋蟀 海葵 白鹭 戴口罩的病人 值夜护士 推轮椅的人 打伞的人 骑车人 蘑菇 苔藓 藤蔓 仙人掌 蕨类 蒲公英 水草`),
   organic_matter:split(`羽毛 鱼骨 枯叶 蛋壳 鱼鳞 蝉蜕 贝壳 发丝 花瓣 果皮 昆虫翅膀 枯枝 松果 橘子皮 香蕉皮 树皮 竹节 树根 种子 麦穗 棉花 枯草 松针 海带 蜂巢 蚕茧 珊瑚 骨头 鹿角 鸟巢 橡果 椰壳 丝瓜络 干花 洋葱皮 玉米须 菜根 苹果核 梨籽 西瓜籽 葡萄梗 茶叶渣 咖啡渣 虾壳 鸡骨 叶脉 蒲公英绒毛 芦苇穗 根须 花粉 花蕊 木屑`),
   material:split(`金属 玻璃 铝箔 磨砂塑料 透明树脂 橡胶 搪瓷 湿纸浆 软木 蜂蜡 石膏 冰 盐粒 砂糖 红砖 水泥 瓷片 亚克力 尼龙 帆布 丝绸 天鹅绒 牛皮纸 瓦楞纸 描图纸 薄纱 乳胶 硅胶 泡沫 海绵 软陶 黏土 炭粉 粉笔灰 铜 黄铜 生铁 不锈钢 银 胶合板 藤编 竹片 皮革 人造毛 棉线 鱼线 钢丝 铁丝网 防水布 塑料膜 保鲜膜 气泡膜 反光膜 油布 柏油 鹅卵石 大理石 花岗岩 陶瓷 贝母 云母片 玻璃纸 蜡纸 纱布 药棉 毛毡 碎玻璃 纸浆 凝胶 滤纸 无纺布 透明软管 磨砂玻璃 水磨石 砂浆 沥青 水 残胶`),
-  action:split(`生长 滴落 燃烧 融化 折叠 撕裂 扩张 坠落 旋转 渗出 向外溢出 漂移 下沉 堆叠 挤压 拉伸 剥落 翻滚 散开 聚拢 爬行 鼓起 塌陷 蒸发 起雾 摇摆 弯曲 裂开 发芽 结晶 冒泡 逐渐褪色 生锈 凝结 渗透 打结 卷曲 收缩 碎裂 翻转 散落 喷涌 流淌 拍打 摩擦 缝合 编织 堵塞 漏出 消失 显影 发光 抖动 绕行 漂白 沉积 脱落 抽吸 注入 输送 冲洗 过滤 沥干 搅拌 揉捏 擀平 切片 削皮 磨碎 沸腾 解冻 密封 封口 打包 拆封 压扁 擦拭 刮除 冲刷 浸泡 拧干 铺开 折回`),
+  action:split(`生长 滴落 燃烧 融化 折叠 撕裂 扩张 坠落 旋转 渗出 向外溢出 漂移 下沉 堆叠 挤压 拉伸 剥落 翻滚 散开 聚拢 爬行 鼓起 塌陷 蒸发 起雾 摇摆 弯曲 裂开 发芽 结晶 冒泡 逐渐褪色 生锈 凝结 渗透 打结 卷曲 收缩 碎裂 翻转 散落 喷涌 流淌 拍打 摩擦 缝合 编织 堵塞 漏出 消失 显影 发光 抖动 绕行 漂白 沉积 脱落 抽吸 注入 输送 冲洗 过滤 沥干 搅拌 揉捏 擀平 切片 削皮 磨碎 沸腾 解冻 密封 封口 打包 拆封 压扁 擦拭 刮除 冲刷 浸泡 拧干 铺开 折回 零散分布 堆积 形成拖尾 向四周展开 停留在边缘 形成一条线 聚集成一片 疏密不均地分布`),
   state:split(`潮湿 半透明 腐烂 冻结 已经褪色 松弛 发白 膨胀 破损 浑浊 柔软 失重 扭曲 倒置 悬空 浸水 起皱 干裂 粘连 发亮 局部透明 表面起泡 布满锈迹 沉在水底 失去颜色 浸透 脱胶 变形 鼓包 发霉 焦黑 断裂 磨损 结块 凝固 松散 绷紧 摇摇欲坠 沾满灰尘 覆盖油膜 边缘消失 只剩轮廓 挤成一团 拉成细丝 留下残影 刚被拆开 尚未封口 贴满标签 内部结霜 吸饱雨水 沾着油渍 蒙着灰尘 带有指纹 留有胶痕 局部褪色 失去光泽 过度膨胀 受热变形 边缘发黑 中间凹陷 一侧翘起 尚有余温 已经冷却 接近融化 结着薄冰 覆着水膜 起满气泡 布满裂纹 磨出毛边`),
-  relation:split(`穿过 包裹 覆盖 嵌入 贴合 缠绕 并排 支撑 悬挂于 围绕 贴附 托住 连接 替代 映照 遮挡 卡在中间 共享同一影子 互相穿插 隔着玻璃相望 沿裂缝排列 叠放在一起 被压在下面 被细线牵住 在表面投影 与轮廓重合 被胶带固定 从孔洞穿出 围成一个圆 首尾相连 背靠背站立 漂在上方 沉在下方 夹在两层之间 彼此吸附 互相排斥 保持错位 交叉成网 藏在背面 被薄膜隔开 沿折痕相接 围住空白 遮住一半 彼此复制 逐渐融合 轻轻碰触 平行延伸 交替出现 被水珠连起 在反光中重叠 相互打结 彼此托举 被裂纹贯穿 隔着雾气重合 塞在内部 贴着表面 穿过中心 沿着折痕延伸 被绳子连接 与影子错位 对称排列 在玻璃后面 夹在书页之间 挂在门把手上 绕过栏杆`),
+  relation:split(`穿过 包裹 覆盖 嵌入 贴合 缠绕 并排 支撑 悬挂于 围绕 贴附 托住 连接 替代 映照 遮挡 卡在中间 共享同一影子 互相穿插 隔着玻璃相望 沿裂缝排列 叠放在一起 被压在下面 被细线牵住 在表面投影 与轮廓重合 被胶带固定 从孔洞穿出 围成一个圆 首尾相连 背靠背站立 漂在上方 沉在下方 夹在两层之间 彼此吸附 互相排斥 保持错位 交叉成网 藏在背面 被薄膜隔开 沿折痕相接 围住空白 遮住一半 彼此复制 逐渐融合 轻轻碰触 平行延伸 交替出现 被水珠连起 在反光中重叠 相互打结 彼此托举 被裂纹贯穿 隔着雾气重合 塞在内部 贴着表面 穿过中心 沿着折痕延伸 被绳子连接 与影子错位 对称排列 在玻璃后面 夹在书页之间 挂在门把手上 绕过栏杆 从缝隙中 沿边缘 从底部 从开口处 顺着裂口 沿地面 沿墙角 从容器边缘 从内部向外 沿表面`),
   visual:split(`冷白漫射光 紫色 绿色 俯视 低机位 浅景深 逆光 局部高光 低饱和 冷白顶光 柔和侧光 清晨薄光 雨天漫射光 一束斜阳 闪烁红光 低饱和蓝色 浅黄逆光 砖红色反射 鼠尾草绿阴影 水面波纹光 银色高光 模糊倒影 长而淡的影子 局部过曝 微弱背光 阴天灰光 日落余光 霓虹残光 车灯扫过 烛光 月光 投影仪光束 百叶窗条纹光 水下散射光 单色红光 暗绿色环境光 奶油色背景 深蓝阴影 轻微失焦 颗粒状暗部 高反差轮廓 平坦无影光 镜面反射 重复光斑 雾中散光 大面积留白 低对比灰阶 局部鲜红 透明叠色 硬边阴影 冷暖光交界 强烈逆光 低位侧光 顶部聚光 背景过曝 局部欠曝 柔软半影 油膜虹彩 灰蓝色调 褪色粉红 水泥灰 黑白高反差`),
   scale:split(`巨型化 微缩 密集 稀疏 无限重复 局部放大 数量失控 比例失衡 数百个 一整墙 铺满地面 只有指甲大小 和房间一样大 成千上万个 一小把 三层楼高 缩成一粒灰尘 排成一公里 密密麻麻 只剩一个 成双成对 填满浴缸 沿墙无尽延伸 覆盖整张桌子 大得无法搬动 小到几乎看不见 放大一百倍 缩小十倍 占据半个房间 从一个变成两个 大小逐级递减 以镜像成对 挤成紧密方阵 围绕一个空位 铺满所有台阶 极薄如膜 厚如床垫 细如发丝 粗如水管 狭长如走廊 扁平如纸 与房间等宽 与窗户等高`)
 };
 
 const tagRules={container:['hollow','fillable','overflowable'],organic_matter:['organic','trace'],life:['living'],action:['temporal'],state:['property'],relation:['multi-entity'],visual:['viewing-condition'],scale:['quantity-scale']};
 const specialTags={'蜘蛛':['thread','fragile'],'糖罐':['rigid'],'蘑菇':['growth','cluster','soft-organic'],'弹簧':['elastic','compression','extension'],'残胶':['detail','trace','surface','adhesive'],'玻璃':['transparent','rigid'],'水':['fluid','reflective'],'墙角':['structure','boundary'],'门缝':['structure','threshold']};
+const explicitSyntaxRoles=Object.fromEntries(['零散分布','堆积','向四周展开','停留在边缘','形成一条线','聚集成一片','疏密不均地分布'].map(text=>[text,'result']));
 const sentenceRoleFor=(category,text)=>{
   if(category==='space')return 'setting';
   if(category==='container')return 'container';
@@ -26,4 +27,4 @@ const sentenceRoleFor=(category,text)=>{
   if(category==='material')return 'visual_detail';
   return 'subject';
 };
-export const CORE_WORDS=Object.entries(vocabulary).flatMap(([category,texts])=>texts.map((text,index)=>{const sentenceRole=sentenceRoleFor(category,text);return {id:`v2_${category}_${String(index+1).padStart(3,'0')}`,text,category,sentenceRole,syntaxRole:sentenceRole,tags:[...(tagRules[category]||[]),...(specialTags[text]||[])],source:'core-v2',weight:1}}));
+export const CORE_WORDS=Object.entries(vocabulary).flatMap(([category,texts])=>texts.map((text,index)=>{const sentenceRole=explicitSyntaxRoles[text]||sentenceRoleFor(category,text);return {id:`v2_${category}_${String(index+1).padStart(3,'0')}`,text,category,sentenceRole,syntaxRole:sentenceRole,tags:[...(tagRules[category]||[]),...(specialTags[text]||[])],source:'core-v2',weight:1}}));
