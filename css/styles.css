@@ -282,13 +282,16 @@ h1, h2, h3, p { letter-spacing: 0; }
 .ingredient-rail { position: absolute; z-index: 5; top: 22px; left: 28px; right: 28px; min-width: 0; }
 .ingredient-rail h2 { margin: 0 0 10px; font: 600 var(--type-section-title)/1.4 var(--font-zh); }
 .composer-ingredients { position: static; min-height: 90px; min-width: 0; padding: 3px 0 10px; overflow-x: auto; overflow-y: hidden; display: flex; flex-wrap: nowrap; align-items: flex-start; gap: 10px; scrollbar-width: thin; }
-.composer-ingredients .ingredient { flex: 0 0 104px; width: 104px; height: 76px; min-height: 0; padding: 11px 9px 7px; transform: none; }
+.composer-ingredients .ingredient { flex: 0 0 104px; width: 104px; height: 76px; min-height: 0; padding: 8px 8px 5px; transform: none; display: grid; grid-template-rows: 9px minmax(0, 1fr) auto; align-items: center; }
+.composer-ingredients .ingredient i { margin: 0 auto; }
+.composer-ingredients .ingredient b { max-height: 2.5em; overflow: hidden; line-height: 1.25; }
+.composer-ingredients .role-trigger { margin-top: 0; }
 .ingredient-rail .sketch-link { position: absolute; top: 0; right: 0; padding-bottom: 2px; border-bottom: 1px solid var(--red); color: var(--ink); font-size: var(--type-body); text-decoration: none; }
 .desk-lip { top: 150px; }
 .desk-surface::before { inset: 156px 23px 24px; }
 .dial-area { top: 181px; left: 55px; width: 410px; }
 .desk-control { top: 205px; right: 104px; }
-.compose-trigger { right: 64px; bottom: 30px; width: 94px; height: 94px; }
+.compose-trigger { right: 64px; bottom: 46px; width: 94px; height: 94px; }
 .composer-output { margin: 52px auto 0; }
 .composer-output > header { padding: 0 2px 10px; }
 .output-paper { min-height: 170px; padding: 42px 54px; }
