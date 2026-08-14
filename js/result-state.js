@@ -8,8 +8,8 @@ const REQUIRED_ROLES=[
 ];
 
 export const COMPLETION_HINTS={
-  path:{label:'路径 / 出口',description:'它从哪里经过、滑出或向外延伸？',examples:['从缝隙中','沿边缘','从底部','顺着裂口','沿地面','从容器边缘']},
-  result:{label:'结果形态',description:'动作结束后，元素最后呈现什么形态？',examples:['散开','零散分布','堆积','铺开','形成拖尾','停留在边缘']}
+  path:{label:'路径 / 出口',description:'元素从哪里经过、出来或向外延伸？'},
+  result:{label:'结果形态',description:'动作结束后，元素最终呈现什么形态？'}
 };
 
 export function missingResultRoles(result){

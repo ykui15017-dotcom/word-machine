@@ -165,6 +165,11 @@ h1, h2, h3, p { letter-spacing: 0; }
 .dock-card { position: relative; min-width: 92px; min-height: 67px; padding: 12px 20px 8px 12px; border: 1px solid #55564f; border-radius: 4px; background: var(--paper); display: flex; flex-direction: column; justify-content: center; }
 .dock-card small { color: var(--muted); font-size: var(--type-meta); text-transform: uppercase; }
 .dock-empty { color: var(--muted); font-size: var(--type-meta); }
+.replacement-chooser { flex-basis: 100%; max-width: 520px; padding: 12px; border: 1px solid var(--line); background: #fffaf0; font-size: var(--type-meta); }
+.replacement-chooser div { display: flex; flex-wrap: wrap; gap: 6px; margin: 9px 0; }
+.replacement-chooser button { padding: 5px 8px; border: 1px solid var(--line); background: transparent; cursor: pointer; }
+.replacement-chooser [data-replace]:hover, .replacement-chooser [data-replace]:focus-visible { border-color: var(--red); color: var(--red); }
+.replacement-chooser .cancel-replacement { border: 0; color: var(--muted); }
 .dock-actions { flex: 0 0 auto; display: flex; align-items: center; gap: 18px; }
 .dock-actions a { padding: 14px 20px; background: var(--red); color: white; font: var(--type-body)/1.4 var(--font-en); text-decoration: none; white-space: nowrap; }
 
