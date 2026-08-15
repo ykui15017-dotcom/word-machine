@@ -414,3 +414,44 @@ h1, h2, h3, p { letter-spacing: 0; }
 .ingredient-rail .ingredient-actions .sketch-link { position: static; }
 .random-drop { min-height: 30px; padding: 5px 11px; border: 1px dashed #77776f; border-radius: 3px; background: #f8f3e8; color: var(--ink); font: 500 12px/1 var(--font-cn); cursor: pointer; }
 .random-drop:hover { border-color: var(--red); color: var(--red); transform: rotate(-1deg); }
+
+/* Keep the Machine controls usable when the viewport is narrower than a
+   typical phone, without changing the established mobile layout above it. */
+@media (max-width: 380px) {
+  .composer-main,
+  .composer-workbench,
+  .desk-surface { min-width: 0; }
+
+  .ingredient-rail { top: 8px; min-width: 0; }
+  .ingredient-rail h2 { margin-bottom: 2px; white-space: nowrap; }
+
+  .ingredient-actions {
+    position: static;
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 4px;
+  }
+  .ingredient-actions button,
+  .ingredient-actions .sketch-link { flex: 0 0 auto; white-space: nowrap; }
+  .ingredient-actions button { padding-inline: 3px; }
+
+  .composer-ingredients {
+    min-height: 80px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    display: flex;
+    flex-wrap: nowrap;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .composer-ingredients::-webkit-scrollbar { display: none; }
+  .composer-ingredients .ingredient { flex-shrink: 0; }
+
+  .desk-lip { top: 150px; }
+  .desk-surface::before { top: 156px; }
+}
