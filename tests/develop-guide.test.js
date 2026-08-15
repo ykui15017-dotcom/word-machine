@@ -58,3 +58,27 @@ test('sparse input remains useful without repeating synonymous labels',()=>{
   assert.ok(guide.prompts.length<=7);
   assert.equal(new Set(labels(guide)).size,guide.prompts.length);
 });
+
+import {buildVisualDevelop} from '../js/visual-develop.js';
+
+const petals=[item('花瓣','subject'),item('窗边','setting','space'),item('贴附在','placement','relation'),item('垂落','secondary_action','action'),item('凌乱地','visual_detail','visual')];
+const pills=[item('药片','subject'),item('阳台','setting','space'),item('从箱口','path','relation'),item('溢出','secondary_action','action'),item('冷白顶光','light','visual')];
+
+test('visual development returns exactly three distinct moves per direction',()=>{
+  const result=buildVisualDevelop(petals);
+  assert.deepEqual(Object.keys(result),['relation','scale','material','space','light','moment']);
+  for(const moves of Object.values(result)){
+    assert.equal(moves.length,3);
+    assert.equal(new Set(moves.map(move=>move.name)).size,3);
+    assert.ok(moves.every(move=>move.name&&move.text));
+  }
+});
+
+test('visual development changes with ingredients without changing its input',()=>{
+  const snapshot=structuredClone(petals);
+  const a=buildVisualDevelop(petals),b=buildVisualDevelop(pills);
+  assert.deepEqual(petals,snapshot);
+  assert.notDeepEqual(a,b);
+  assert.match(Object.values(a).flat().map(move=>move.text).join(' '),/花瓣|窗边|贴附|垂落|凌乱/);
+  assert.match(Object.values(b).flat().map(move=>move.text).join(' '),/药片|阳台|从箱口|溢出/);
+});
