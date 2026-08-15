@@ -138,9 +138,12 @@ h1, h2, h3, p { letter-spacing: 0; }
 .search { width: 100%; min-width: 0; padding: 0; border: 0; background: transparent; font-size: var(--type-section-title); outline: none; }
 .search:focus { box-shadow: 0 1px var(--red); }
 .browse-label { margin: 26px 0 10px; color: var(--muted); }
-.filters { margin: 0 0 32px; display: flex; flex-wrap: wrap; gap: 8px; }
+.filter-tools { margin: 0 0 32px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.filters { margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .filter { padding: 7px 11px; border: 1px solid var(--line); border-radius: 20px; background: none; color: var(--muted); font-size: var(--type-body); letter-spacing: .04em; cursor: pointer; }
 .filter.active { border-color: #7c8875; background: var(--sage); color: white; }
+.restore-hidden { flex: 0 0 auto; padding: 8px 0; border: 0; background: none; color: var(--muted); font-size: var(--type-meta); letter-spacing: .04em; cursor: pointer; }
+.restore-hidden:hover, .restore-hidden:focus-visible { color: var(--red); }
 .archive-rule { padding-bottom: 12px; border-bottom: 1px solid #353630; display: flex; justify-content: space-between; }
 .intent-guide { position: relative; margin: 0 0 28px; padding: 17px 20px; border-left: 2px solid var(--red); background: #faf6ec; }
 .intent-guide span, .intent-guide strong { display: block; }
@@ -153,7 +156,8 @@ h1, h2, h3, p { letter-spacing: 0; }
 .word-list { width: 100%; }
 .bank-word { min-height: 55px; border-bottom: 1px solid var(--line); font-size: var(--type-body); display: grid; grid-template-columns: minmax(0, 1fr) 140px 145px; align-items: center; }
 .word-index { min-width: 0; padding-left: 8px; overflow-wrap: anywhere; }
-.bank-word .category { color: var(--muted); font-size: var(--type-meta); letter-spacing: .04em; }
+.delete-word { justify-self: start; padding: 6px 0; border: 0; background: none; color: var(--muted); font-size: var(--type-meta); letter-spacing: .04em; cursor: pointer; }
+.delete-word:hover, .delete-word:focus-visible { color: var(--red); }
 .add-machine { height: 32px; border: 0; border-left: 1px solid var(--line); background: none; color: #8f3f36; font-size: var(--type-body); cursor: pointer; }
 .add-machine.added { color: #65745f; }
 .machine-dock { width: 100%; margin-top: 28px; padding: 22px 28px; border: 1px solid #353630; border-radius: 8px; background: #faf7ef; }
@@ -244,10 +248,10 @@ h1, h2, h3, p { letter-spacing: 0; }
   .tray-mini { grid-column: 1 / -1; grid-row: 2; }
   .archive-main { width: calc(100% - 28px); padding: 26px 0 60px; }
   .search-wrap { height: 52px; padding-inline: 13px; }
+  .filter-tools { align-items: stretch; flex-direction: column; gap: 5px; }
   .filters { gap: 6px; }
   .filter { padding: 6px 9px; }
-  .bank-word { grid-template-columns: minmax(0, 1fr) 116px; }
-  .bank-word .category { display: none; }
+  .bank-word { grid-template-columns: minmax(0, 1fr) 70px 116px; }
   .machine-dock { padding: 18px; }
   .machine-dock header { align-items: flex-start; flex-direction: column; gap: 3px; }
   .dock-actions { justify-content: space-between; gap: 10px; }
