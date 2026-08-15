@@ -12,8 +12,10 @@ export const GRAMMAR_TYPES={
   LEGACY:'legacy'
 };
 
+const TARGET_CATEGORIES=new Set(['object','container','life','organic_matter']);
 export function relationTargetFor(roles={}){
-  return first(roles,'secondary')||first(roles,'container')||first(roles,'setting')||null;
+  const secondary=all(roles,'secondary');
+  return secondary.find(item=>TARGET_CATEGORIES.has(item.category))||secondary[0]||first(roles,'container')||first(roles,'setting')||null;
 }
 
 const DIRECT_RELATION=/^(缠绕|贴附|贴合|覆盖|包裹|围绕|悬挂于|嵌入|连接|支撑|托住|替代|映照|遮挡|漂在上方|沉在下方|相互打结|彼此托举|轻轻碰触|并排|首尾相连)$/;
