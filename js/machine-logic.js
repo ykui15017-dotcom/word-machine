@@ -3,6 +3,7 @@ import {normalizeIngredient,composeIngredients} from './ingredient-composer.js';
 import {missingResultRoles} from './result-state.js';
 
 export const MACHINE_LIMIT=5;
+export const MANUAL_LIMIT=8;
 export const STRUCTURE=[
   {id:'subject',roles:['subject'],required:true},
   {id:'place',roles:['setting','container']},
@@ -30,7 +31,7 @@ export function inspectMachine(items=[]){
   return {hasSubject:occupied.has('subject'),hasSupport:occupied.has('place')||occupied.has('entry')||occupied.has('action'),missing,full:items.length>=MACHINE_LIMIT,complete:missing.length===0};
 }
 export function supplementMissing(items=[],rng=Math.random,maxAdd=2){
-  const result=items.slice(0,MACHINE_LIMIT),status=inspectMachine(result);
+  const result=items.slice(),status=inspectMachine(result);
   const targets=status.missing.filter(item=>item.role==='support'||STRUCTURE.some(slot=>slot.roles.includes(item.role)));
   if(status.full){
     const redundant=findRedundantRandomIndex(result);
@@ -56,12 +57,8 @@ function findRedundantRandomIndex(items){
 export function addManualToMachine(items=[],word){
   if(items.some(item=>item.id===word.id))return {status:'exists',items};
   const manual={...word,source:'manual',locked:true};
-  if(items.length<MACHINE_LIMIT)return {status:'added',items:[...items,manual]};
-  const replaceIndex=items.map((item,index)=>({item,index})).filter(({item})=>item.source==='random'&&!item.locked)
-    .sort((a,b)=>priority(b.item)-priority(a.item))[0]?.index;
-  if(replaceIndex===undefined)return {status:'choose',items};
-  const next=items.slice();next.splice(replaceIndex,1,manual);
-  return {status:'replaced',items:next,replaced:items[replaceIndex]};
+  if(items.length<MANUAL_LIMIT)return {status:'added',items:[...items,manual]};
+  return {status:'limit',items};
 }
 export function replaceRandom(items=[],rng=Math.random){
   const fixed=items.filter(word=>word.source!=='random');
