@@ -3,6 +3,7 @@ import {supplementMissing,replaceRandom,fullRandom,inspectMachine} from './machi
 import {saveDrop,setMachineState,getMachineState,getIngredients,setIngredients,setIngredientRole,toggleIngredientLock,clearRandomIngredients,removeIngredient,clearIngredients} from './storage.js';
 import {initNav,escapeHtml} from './common.js';
 import {formatResultState,missingResultRoles} from './result-state.js';
+import {buildDevelopGuide} from './develop-guide.js';
 
 initNav();
 const idea=document.querySelector('.recipe-text');
@@ -15,24 +16,13 @@ let hasResult=false;
 let messageTimer;
 let rolePopover;
 
-function developRole(word){
-  const normalized=normalizeIngredient(word);
-  const category=normalized.sourceCategory||normalized.category;
-  if(normalized.finalRole==='subject')return 'SUBJECT';
-  if(normalized.finalRole==='setting')return 'SCENE';
-  if(normalized.finalRole==='container')return 'CONTAINER';
-  if(['placement','path','secondary_action','result'].includes(normalized.finalRole))return 'ACTION';
-  if(normalized.finalRole==='modifier_state')return category==='material'?'MATERIAL':'STATE';
-  if(category==='material')return 'MATERIAL';
-  if(['light','perspective','visual_detail'].includes(normalized.finalRole)||category==='visual')return 'VISUAL';
-  return null;
-}
-function renderDevelopSummary(){
-  const ingredients=getIngredients();
-  const known=developPanel.querySelector('.known-material');
-  const roles=ingredients.map(word=>({label:developRole(word),text:word.text})).filter(item=>item.label);
-  known.hidden=!roles.length;
-  known.querySelector('dl').innerHTML=roles.map(item=>`<div><dt>${item.label}</dt><dd>${escapeHtml(item.text)}</dd></div>`).join('');
+function renderDevelopGuide(direction){
+  const module=developPanel.querySelector(`[data-develop-module="${direction}"]`);
+  const guide=buildDevelopGuide(getIngredients(),direction);
+  const known=module.querySelector('.known-material');
+  known.hidden=!guide.known.length;
+  known.querySelector('dl').innerHTML=guide.known.map(item=>`<div><dt>${item.role}</dt><dd>${escapeHtml(item.text)}</dd></div>`).join('');
+  module.querySelector('.develop-prompts').innerHTML=guide.prompts.map(prompt=>`<section><h4>${escapeHtml(prompt.label)}</h4><p>${escapeHtml(prompt.text)}</p></section>`).join('');
 }
 function toggleDevelopDirection(direction){
   const target=developPanel.querySelector(`[data-develop-module="${direction}"]`);
@@ -40,6 +30,7 @@ function toggleDevelopDirection(direction){
   developPanel.querySelectorAll('[data-develop-module]').forEach(module=>{module.hidden=true});
   developPanel.querySelectorAll('[data-develop-direction]').forEach(button=>button.setAttribute('aria-expanded','false'));
   if(opening){
+    renderDevelopGuide(direction);
     target.hidden=false;
     developPanel.querySelector(`[data-develop-direction="${direction}"]`).setAttribute('aria-expanded','true');
   }
@@ -185,7 +176,10 @@ document.addEventListener('click',event=>{
   }
   if(action==='develop'){
     const opening=developPanel.hidden;
-    if(opening)renderDevelopSummary();
+    if(opening){
+      const active=developPanel.querySelector('[data-develop-direction][aria-expanded="true"]')?.dataset.developDirection;
+      if(active)renderDevelopGuide(active);
+    }
     developPanel.hidden=!opening;control.setAttribute('aria-expanded',opening);
     say(opening?'已展开当前视觉构想。':'已收起继续展开。');
   }
