@@ -17,7 +17,41 @@
 <header><h2 id="output-title">视觉构想</h2><span class="result-state" aria-live="polite">等待词语</span></header>
 <div class="output-paper"><span class="paper-clip" aria-hidden="true"></span><p class="recipe-text" aria-live="polite">从词库选择词语，再让它们在这里相遇。</p></div>
 <div class="composer-actions" aria-label="组合操作"><button data-action="another">换一种组合</button><a href="./word-bank.html">添加词语</a><button data-action="save">保存灵感</button><button data-action="develop" aria-expanded="false">继续展开</button></div>
-<div class="develop-panel" hidden><strong>下一步</strong><p>把这句话当作草图：接下来可以记录构图、材质与光线。完整的开发工具将在下一阶段开放。</p></div><p class="aside-message" aria-live="polite"></p>
+<section class="develop-panel" aria-labelledby="develop-title" hidden>
+<header class="develop-header"><h2 id="develop-title">DEVELOP THIS IDEA</h2><p>从不同创作方式继续发展当前视觉构想。</p></header>
+<div class="develop-summary">
+<div><h3>YOUR MATERIAL</h3><p class="develop-material"></p></div>
+<div><h3>CURRENT IDEA</h3><p class="develop-idea"></p></div>
+</div>
+<div class="develop-directions" aria-label="选择发展方向">
+<button data-develop-direction="ai-image" aria-expanded="false"><strong>AI IMAGE</strong><span>把当前想法继续发展成一张可以被描述清楚的图像。</span></button>
+<button data-develop-direction="still-life" aria-expanded="false"><strong>STILL LIFE</strong><span>把当前想法转译成可以真实搭建和拍摄的静物。</span></button>
+<button data-develop-direction="set-design" aria-expanded="false"><strong>SET DESIGN</strong><span>把当前想法扩大为空间、布景或装置尺度。</span></button>
+</div>
+<div class="develop-modules">
+<article class="develop-module" data-develop-module="ai-image" hidden>
+<header><h3>AI IMAGE</h3><p>为了最后形成 AI 图像提示词，还需要想清楚什么？</p></header>
+<section><h4>SUBJECT</h4><p class="module-note">先把画面里的东西说清楚。</p><div class="known-material" hidden><h5>YOU ALREADY HAVE</h5><dl></dl></div><ul><li>最主要的视觉主体是什么？</li><li>主体具体位于哪里？</li><li>是否还有第二个重要元素？</li><li>两个元素之间是什么关系？</li><li>哪个材质或表面状态最值得强调？</li></ul></section>
+<section><h4>CAMERA</h4><p class="module-note">决定观众从哪里看这一幕。</p><ul><li>特写、近景、中景还是远景？</li><li>正面、俯视、平视、低机位还是贴近表面？</li><li>镜头距离主体多近？</li><li>主体位于中央还是偏离中心？</li><li>是否需要大面积留白？</li><li>背景清晰还是虚化？</li></ul><div class="reference-chips"><span>CLOSE-UP</span><span>MEDIUM</span><span>WIDE</span><span>TOP-DOWN</span><span>EYE LEVEL</span><span>LOW ANGLE</span><span>NEGATIVE SPACE</span></div></section>
+<section><h4>LIGHT</h4><p class="module-note">决定材质、颜色和空间如何被看见。</p><ul><li>光从哪个方向进入？</li><li>柔光还是硬光？</li><li>主色调是什么？</li><li>背景是什么颜色或材质？</li><li>哪些表面需要透光、反光或形成阴影？</li><li>整体更接近写实、冷静、电影感、标本感还是超现实？</li></ul></section>
+<footer><strong>READY TO WRITE</strong><p>当主体、镜头与光线明确以后，就可以把这些信息整理成 AI 图像提示词。</p></footer>
+</article>
+<article class="develop-module" data-develop-module="still-life" hidden>
+<header><h3>STILL LIFE</h3><p>思考这件事情现实中怎么做出来、怎么拍。</p></header>
+<section><h4>MATERIAL</h4><p class="module-note">先判断哪些元素真的可以被做出来。</p><ul><li>哪些词可以直接变成真实道具？</li><li>哪些需要寻找替代材料？</li><li>哪些词只是状态，而不是实物？</li><li>哪些部分需要透明、柔软、潮湿、反光、粗糙或易变形？</li><li>是否需要水、玻璃、纸张、薄膜、纱、金属等辅助材料？</li></ul><div class="reference-chips"><span>TRANSPARENCY</span><span>WEIGHT</span><span>SURFACE</span><span>SOFT / HARD</span><span>SUPPORT</span><span>STABILITY</span></div></section>
+<section><h4>SETUP</h4><p class="module-note">把动作变成一个可以停住的瞬间。</p><ul><li>主体应该放在哪里？</li><li>什么东西承载另一个东西？</li><li>是否需要悬挂、堆积、浸泡、倾斜、包裹或固定？</li><li>动态词怎样转化为一个静止瞬间？</li><li>哪些痕迹应该真实制作？</li><li>是否存在会穿帮的支架、鱼线、胶或支撑结构？</li></ul></section>
+<section><h4>SHOOT</h4><p class="module-note">最后决定镜头与光线。</p><ul><li>特写、近景还是完整静物？</li><li>相机高度与主体是什么关系？</li><li>顶光、侧光、逆光还是正面柔光？</li><li>是否需要柔光屏？</li><li>是否需要反光板或黑旗？</li><li>景深应该浅还是深？</li><li>哪个局部必须最清楚？</li></ul></section>
+<footer><strong>BEFORE YOU SHOOT</strong><p>先确认：材料可以实现、关系看得见、光线突出核心元素。</p></footer>
+</article>
+<article class="develop-module" data-develop-module="set-design" hidden>
+<header><h3>SET DESIGN</h3><p>把当前构想从桌面级画面扩大为空间关系。</p></header>
+<section><h4>SPACE</h4><p class="module-note">先决定这件事发生在哪里。</p><ul><li>是房间、棚内、街道、仓库还是抽象空间？</li><li>主体在中央、边缘还是角落？</li><li>场景是否需要墙面、地面、入口、出口或高度关系？</li><li>镜头 / 观众从哪里进入？</li><li>第一眼应该看到什么？</li></ul></section>
+<section><h4>SCALE</h4><p class="module-note">改变尺度和数量。</p><ul><li>哪个元素可以被放大？</li><li>哪个元素可以缩小？</li><li>单个物体能否大量重复？</li><li>原本桌面大小的东西能否变成人体尺度？</li><li>是否需要让某个元素占领整个空间？</li><li>是否可以向画面外继续延伸？</li></ul><div class="reference-chips"><span>ENLARGE</span><span>REPEAT</span><span>STACK</span><span>SPREAD</span><span>SUSPEND</span><span>OCCUPY</span></div></section>
+<section><h4>BUILD</h4><p class="module-note">考虑它真的如何存在。</p><ul><li>需要什么支撑结构？</li><li>哪些东西悬挂、堆叠、包裹、穿过或铺开？</li><li>使用什么真实材料搭建？</li><li>哪些材料需要透光或反光？</li><li>光线是否也成为空间结构的一部分？</li><li>人能进入其中，还是只能从外部观看？</li></ul></section>
+<footer><strong>BUILD THE RELATION</strong><p>不要只是把物件放进空间，让它们真正改变空间。</p></footer>
+</article>
+</div>
+</section><p class="aside-message" aria-live="polite"></p>
 </section>
 <section class="tray-footer" aria-label="已选词托盘"><div><span>已选词托盘</span></div><div class="tray-mini ingredient-tray"></div><button data-action="clear-random">清除随机词</button><button class="clear-ingredients">清空全部</button></section>
 </main><footer class="site-footer">WORD MACHINE · 视觉构想工作台 · <span class="year"></span></footer><div class="toast" role="status" aria-live="polite"></div><script type="module" src="./js/machine.js"></script>
