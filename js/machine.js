@@ -126,6 +126,13 @@ function compose(isAnother=false){
 }
 
 document.addEventListener('click',event=>{
+  const changeOne=event.target.closest('[data-change-one]');
+  if(changeOne){
+    const options=developPanel.querySelector('.change-one-options');
+    const opening=options.hidden;
+    options.hidden=!opening;changeOne.setAttribute('aria-expanded',String(opening));
+    return;
+  }
   const direction=event.target.closest('[data-visual-direction]');
   if(direction){showVisualDirection(direction.dataset.visualDirection);return}
   if(event.target.closest('[data-surprise-develop]')){const directions=['relation','scale','material','space','light','moment'];showVisualDirection(directions[Math.floor(Math.random()*directions.length)]);return}
@@ -173,7 +180,6 @@ document.addEventListener('click',event=>{
   }
   if(action==='develop'){
     const opening=developPanel.hidden;
-    if(opening){const active=developPanel.querySelector('[data-visual-direction][aria-expanded="true"]')?.dataset.visualDirection;if(active)showVisualDirection(active)}
     developPanel.hidden=!opening;control.setAttribute('aria-expanded',opening);
     say(opening?'已展开当前视觉构想。':'已收起继续展开。');
   }
