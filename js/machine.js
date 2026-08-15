@@ -9,11 +9,45 @@ const idea=document.querySelector('.recipe-text');
 const message=document.querySelector('.aside-message');
 const resultState=document.querySelector('.result-state');
 const developPanel=document.querySelector('.develop-panel');
+const developMaterial=developPanel.querySelector('.develop-material');
+const developIdea=developPanel.querySelector('.develop-idea');
 const compositionDial=document.querySelector('.composition-dial');
 let variation=0;
 let hasResult=false;
 let messageTimer;
 let rolePopover;
+
+function developRole(word){
+  const normalized=normalizeIngredient(word);
+  const category=normalized.sourceCategory||normalized.category;
+  if(normalized.finalRole==='subject')return 'SUBJECT';
+  if(normalized.finalRole==='setting')return 'SCENE';
+  if(normalized.finalRole==='container')return 'CONTAINER';
+  if(['placement','path','secondary_action','result'].includes(normalized.finalRole))return 'ACTION';
+  if(normalized.finalRole==='modifier_state')return category==='material'?'MATERIAL':'STATE';
+  if(category==='material')return 'MATERIAL';
+  if(['light','perspective','visual_detail'].includes(normalized.finalRole)||category==='visual')return 'VISUAL';
+  return null;
+}
+function renderDevelopSummary(){
+  const ingredients=getIngredients();
+  developMaterial.textContent=ingredients.map(word=>word.text).join(' · ');
+  developIdea.textContent=idea.textContent;
+  const known=developPanel.querySelector('.known-material');
+  const roles=ingredients.map(word=>({label:developRole(word),text:word.text})).filter(item=>item.label);
+  known.hidden=!roles.length;
+  known.querySelector('dl').innerHTML=roles.map(item=>`<div><dt>${item.label}</dt><dd>${escapeHtml(item.text)}</dd></div>`).join('');
+}
+function toggleDevelopDirection(direction){
+  const target=developPanel.querySelector(`[data-develop-module="${direction}"]`);
+  const opening=target.hidden;
+  developPanel.querySelectorAll('[data-develop-module]').forEach(module=>{module.hidden=true});
+  developPanel.querySelectorAll('[data-develop-direction]').forEach(button=>button.setAttribute('aria-expanded','false'));
+  if(opening){
+    target.hidden=false;
+    developPanel.querySelector(`[data-develop-direction="${direction}"]`).setAttribute('aria-expanded','true');
+  }
+}
 
 function renderResultState(result){
   const text=formatResultState(result);
@@ -111,6 +145,8 @@ function compose(isAnother=false){
 }
 
 document.addEventListener('click',event=>{
+  const direction=event.target.closest('[data-develop-direction]');
+  if(direction){toggleDevelopDirection(direction.dataset.developDirection);return}
   const roleChoice=event.target.closest('[data-role-choice]');
   if(roleChoice){
     const wordId=rolePopover?.dataset.wordId;
@@ -152,8 +188,10 @@ document.addEventListener('click',event=>{
     const ingredients=getIngredients();saveDrop({words:ingredients,ingredients,recipe:idea.textContent,recipeId:'ingredient-composer'});say('灵感已保存，可在收藏页面查看。');
   }
   if(action==='develop'){
-    const opening=developPanel.hidden;developPanel.hidden=!opening;control.setAttribute('aria-expanded',opening);
-    say(opening?'已打开下一阶段说明。':'已收起开发说明。');
+    const opening=developPanel.hidden;
+    if(opening)renderDevelopSummary();
+    developPanel.hidden=!opening;control.setAttribute('aria-expanded',opening);
+    say(opening?'已展开当前视觉构想。':'已收起继续展开。');
   }
 });
 document.addEventListener('keydown',event=>{
