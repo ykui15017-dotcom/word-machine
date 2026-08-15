@@ -9,8 +9,6 @@ const idea=document.querySelector('.recipe-text');
 const message=document.querySelector('.aside-message');
 const resultState=document.querySelector('.result-state');
 const developPanel=document.querySelector('.develop-panel');
-const developMaterial=developPanel.querySelector('.develop-material');
-const developIdea=developPanel.querySelector('.develop-idea');
 const compositionDial=document.querySelector('.composition-dial');
 let variation=0;
 let hasResult=false;
@@ -31,8 +29,6 @@ function developRole(word){
 }
 function renderDevelopSummary(){
   const ingredients=getIngredients();
-  developMaterial.textContent=ingredients.map(word=>word.text).join(' · ');
-  developIdea.textContent=idea.textContent;
   const known=developPanel.querySelector('.known-material');
   const roles=ingredients.map(word=>({label:developRole(word),text:word.text})).filter(item=>item.label);
   known.hidden=!roles.length;
