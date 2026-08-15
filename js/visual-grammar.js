@@ -16,6 +16,9 @@ export function relationTargetFor(roles={}){
   return first(roles,'secondary')||first(roles,'container')||first(roles,'setting')||null;
 }
 
+const DIRECT_RELATION=/^(缠绕|贴附|贴合|覆盖|包裹|围绕|悬挂于|嵌入|连接|支撑|托住|替代|映照|遮挡|漂在上方|沉在下方|相互打结|彼此托举|轻轻碰触|并排|首尾相连)$/;
+const FLOW_ACTION=/^(流出|滑出|渗出|漏出|倾泻|散落|垂落)$/;
+
 export function analyzeVisualGrammar(roles={}){
   const subject=first(roles,'subject');
   const relation=first(roles,'relation');
@@ -30,9 +33,13 @@ export function analyzeVisualGrammar(roles={}){
   const secondary=first(roles,'secondary');
 
   if(subject&&relation){
-    return target
-      ?{type:GRAMMAR_TYPES.RELATION_TARGET,complete:true,missingRoles:[],target}
-      :{type:GRAMMAR_TYPES.RELATION_TARGET,complete:false,missingRoles:['target'],target:null};
+    if(!target)return {type:GRAMMAR_TYPES.RELATION_TARGET,complete:false,missingRoles:['target'],target:null};
+    // A second physical object is a genuine anchor/target. Containers and spaces
+    // are also allowed when the relation itself is spatially complete, or when a
+    // follow-up action/result makes the intent explicit.
+    if(secondary||action||result||DIRECT_RELATION.test(text(relation))){
+      return {type:GRAMMAR_TYPES.RELATION_TARGET,complete:true,missingRoles:[],target};
+    }
   }
 
   // Two physical objects without a relation are treated as an unfinished
@@ -41,11 +48,12 @@ export function analyzeVisualGrammar(roles={}){
     return {type:GRAMMAR_TYPES.RELATION_OPEN,complete:false,missingRoles:['relation'],target:secondary};
   }
 
-  // Preserve the existing full inside-to-outside action chain when a path is
-  // explicitly present. This is intentionally stricter than the grammars below.
-  if(subject&&container&&path){
+  // Preserve the established inside-to-outside action chain. A path always
+  // selects this grammar; a clear outward-flow action plus placement does too.
+  if(subject&&container&&(path||(placement&&action&&FLOW_ACTION.test(text(action))))){
     const missing=[];
     if(!placement)missing.push('placement');
+    if(!path)missing.push('path');
     if(!action)missing.push('secondary_action');
     if(!result)missing.push('result');
     return {type:GRAMMAR_TYPES.CONTAINER_FLOW,complete:missing.length===0,missingRoles:missing,target:container};
@@ -53,11 +61,11 @@ export function analyzeVisualGrammar(roles={}){
 
   // A container does not always imply an exit path. "水母 / 玻璃罐 / 下沉"
   // is already a valid visual relationship and should not be padded with a fake exit.
-  if(subject&&container&&(action||state||placement)){
+  if(subject&&container&&(action||state)){
     return {type:GRAMMAR_TYPES.CONTAINED_ACTION,complete:true,missingRoles:[],target:container};
   }
 
-  if(subject&&setting&&(action||result||placement)){
+  if(subject&&setting&&(action||result)){
     return {type:GRAMMAR_TYPES.SPACE_ACTION,complete:true,missingRoles:[],target:setting};
   }
 
