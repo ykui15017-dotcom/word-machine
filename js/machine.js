@@ -3,7 +3,7 @@ import {supplementMissing,replaceRandom,fullRandom,inspectMachine} from './machi
 import {saveDrop,setMachineState,getMachineState,getIngredients,setIngredients,setIngredientRole,toggleIngredientLock,clearRandomIngredients,removeIngredient,clearIngredients} from './storage.js';
 import {initNav,escapeHtml} from './common.js';
 import {formatResultState,missingResultRoles} from './result-state.js';
-import {buildDevelopGuide} from './develop-guide.js';
+import {buildVisualDevelop} from './visual-develop.js';
 
 initNav();
 const idea=document.querySelector('.recipe-text');
@@ -16,24 +16,18 @@ let hasResult=false;
 let messageTimer;
 let rolePopover;
 
-function renderDevelopGuide(direction){
-  const module=developPanel.querySelector(`[data-develop-module="${direction}"]`);
-  const guide=buildDevelopGuide(getIngredients(),direction);
-  const known=module.querySelector('.known-material');
-  known.hidden=!guide.known.length;
-  known.querySelector('dl').innerHTML=guide.known.map(item=>`<div><dt>${item.role}</dt><dd>${escapeHtml(item.text)}</dd></div>`).join('');
-  module.querySelector('.develop-prompts').innerHTML=guide.prompts.map(prompt=>`<section><h4>${escapeHtml(prompt.label)}</h4><p>${escapeHtml(prompt.text)}</p></section>`).join('');
+function showVisualDirection(direction){
+  const moves=buildVisualDevelop(getIngredients())[direction];
+  const module=developPanel.querySelector('.visual-moves');
+  module.querySelector('.develop-prompts').innerHTML=moves.map((item,index)=>`<section><span>${String(index+1).padStart(2,'0')}</span><h4>${escapeHtml(item.name)}</h4><p>${escapeHtml(item.text)}</p></section>`).join('');
+  module.hidden=false;
+  developPanel.querySelectorAll('[data-visual-direction]').forEach(button=>button.setAttribute('aria-expanded',String(button.dataset.visualDirection===direction)));
 }
-function toggleDevelopDirection(direction){
-  const target=developPanel.querySelector(`[data-develop-module="${direction}"]`);
-  const opening=target.hidden;
-  developPanel.querySelectorAll('[data-develop-module]').forEach(module=>{module.hidden=true});
-  developPanel.querySelectorAll('[data-develop-direction]').forEach(button=>button.setAttribute('aria-expanded','false'));
-  if(opening){
-    renderDevelopGuide(direction);
-    target.hidden=false;
-    developPanel.querySelector(`[data-develop-direction="${direction}"]`).setAttribute('aria-expanded','true');
-  }
+function toggleMakeGuide(direction){
+  const target=developPanel.querySelector(`[data-make-guide="${direction}"]`),opening=target.hidden;
+  developPanel.querySelectorAll('[data-make-guide]').forEach(guide=>{guide.hidden=true});
+  developPanel.querySelectorAll('[data-make-direction]').forEach(button=>button.setAttribute('aria-expanded','false'));
+  if(opening){target.hidden=false;developPanel.querySelector(`[data-make-direction="${direction}"]`).setAttribute('aria-expanded','true')}
 }
 
 function renderResultState(result){
@@ -132,8 +126,11 @@ function compose(isAnother=false){
 }
 
 document.addEventListener('click',event=>{
-  const direction=event.target.closest('[data-develop-direction]');
-  if(direction){toggleDevelopDirection(direction.dataset.developDirection);return}
+  const direction=event.target.closest('[data-visual-direction]');
+  if(direction){showVisualDirection(direction.dataset.visualDirection);return}
+  if(event.target.closest('[data-surprise-develop]')){const directions=['relation','scale','material','space','light','moment'];showVisualDirection(directions[Math.floor(Math.random()*directions.length)]);return}
+  const makeDirection=event.target.closest('[data-make-direction]');
+  if(makeDirection){toggleMakeGuide(makeDirection.dataset.makeDirection);return}
   const roleChoice=event.target.closest('[data-role-choice]');
   if(roleChoice){
     const wordId=rolePopover?.dataset.wordId;
@@ -176,10 +173,7 @@ document.addEventListener('click',event=>{
   }
   if(action==='develop'){
     const opening=developPanel.hidden;
-    if(opening){
-      const active=developPanel.querySelector('[data-develop-direction][aria-expanded="true"]')?.dataset.developDirection;
-      if(active)renderDevelopGuide(active);
-    }
+    if(opening){const active=developPanel.querySelector('[data-visual-direction][aria-expanded="true"]')?.dataset.visualDirection;if(active)showVisualDirection(active)}
     developPanel.hidden=!opening;control.setAttribute('aria-expanded',opening);
     say(opening?'已展开当前视觉构想。':'已收起继续展开。');
   }
