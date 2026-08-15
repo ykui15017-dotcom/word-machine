@@ -18,18 +18,22 @@
 <div class="output-paper"><span class="paper-clip" aria-hidden="true"></span><p class="recipe-text" aria-live="polite">从词库选择词语，再让它们在这里相遇。</p></div>
 <div class="composer-actions" aria-label="组合操作"><button data-action="another">换一种组合</button><a href="./word-bank.html">添加词语</a><button data-action="save">保存灵感</button><button data-action="develop" aria-expanded="false">继续展开</button></div>
 <section class="develop-panel" aria-labelledby="develop-title" hidden>
-<header class="develop-header"><h2 id="develop-title">DEVELOP THIS IDEA</h2><p>试着改变这个视觉关系，而不是立即决定怎么制作。</p></header>
-<div class="develop-directions" aria-label="选择发展方向">
+<header class="develop-header"><h2 id="develop-title">DEVELOP THIS IDEA</h2><p>把已经形成的视觉构想，转成具体的创作方式。</p></header>
+<section class="make-as" aria-labelledby="make-as-title"><h3 id="make-as-title">MAKE IT AS</h3><div class="make-directions"><button data-make-direction="ai-image" aria-expanded="false">AI IMAGE</button><button data-make-direction="still-life" aria-expanded="false">STILL LIFE</button><button data-make-direction="set-design" aria-expanded="false">SET DESIGN</button><button data-make-direction="painting" aria-expanded="false">PAINTING</button></div>
+<article class="make-guide" data-make-guide="ai-image" hidden><section><h4>SUBJECT</h4><ul><li>主体和第二元素的关系是否清楚？</li><li>哪个材质或表面最重要？</li><li>哪个动作瞬间需要保留？</li></ul></section><section><h4>CAMERA</h4><ul><li>确认景别、机位与拍摄距离。</li><li>安排画面留白与主体占比。</li><li>决定背景清晰度与空间层次。</li></ul></section><section><h4>LIGHT</h4><ul><li>确认方向、软硬与整体色调。</li><li>检查背景和主体是否能够分离。</li><li>保留反射、透明与阴影的关键细节。</li></ul></section></article>
+<article class="make-guide" data-make-guide="still-life" hidden><section><h4>MATERIAL</h4><ul><li>列出真实道具与可用的替代材料。</li><li>测试透明度、软硬与湿度。</li><li>确认材料在镜头前的关键细节。</li></ul></section><section><h4>SETUP</h4><ul><li>检查支撑与整体稳定性。</li><li>隐藏鱼线、胶和支架。</li><li>预留调整和重复搭建的位置。</li></ul></section><section><h4>SHOOT</h4><ul><li>准备柔光屏、反光板与黑旗。</li><li>选择能保留关键细节的景深。</li><li>拍摄前再次检查支撑是否穿帮。</li></ul></section></article>
+<article class="make-guide" data-make-guide="set-design" hidden><section><h4>SPACE</h4><ul><li>确定空间位置与观众入口。</li><li>安排观众与作品的观看距离。</li><li>判断关系在空间内外如何延续。</li></ul></section><section><h4>SCALE</h4><ul><li>测试尺度、重复与占领程度。</li><li>比较悬挂、堆积和留白的比例。</li><li>确认人与空间关系是否清楚。</li></ul></section><section><h4>BUILD</h4><ul><li>规划支撑结构与安装顺序。</li><li>测试材料的透光与反光。</li><li>检查运输、固定与现场安全。</li></ul></section></article>
+<article class="make-guide painting-guide" data-make-guide="painting" hidden><section><h4>COMPOSITION</h4><ul><li>主体在画面中的位置与占比。</li><li>是否使用留白。</li><li>画面重心。</li></ul></section><section><h4>SHAPE</h4><ul><li>主要轮廓与大形。</li><li>重复、重叠、切割关系。</li></ul></section><section><h4>COLOR</h4><ul><li>主色、辅助色、色彩对比。</li><li>明度与饱和度关系。</li></ul></section><section><h4>EDGE</h4><ul><li>清晰边缘 / 模糊边缘。</li><li>哪些部分需要消失或融合。</li></ul></section><section><h4>SURFACE / MARK</h4><ul><li>平涂、笔触、刮擦、堆叠、透明层。</li><li>哪种绘画表面最适合当前视觉关系。</li></ul></section><footer>保持为创作参考，不生成最终绘画方案。</footer></article>
+</section>
+<section class="change-one">
+<button class="change-one-toggle" data-change-one aria-expanded="false" aria-controls="change-one-options">NOT SURE YET? CHANGE ONE THING <span aria-hidden="true">→</span></button>
+<div id="change-one-options" class="change-one-options" hidden><p>选择一个方向，作为一次灵感扰动。</p><div class="develop-directions" aria-label="选择一个变化方向">
 <button data-visual-direction="relation" aria-expanded="false">RELATION</button><button data-visual-direction="scale" aria-expanded="false">SCALE</button><button data-visual-direction="material" aria-expanded="false">MATERIAL</button>
 <button data-visual-direction="space" aria-expanded="false">SPACE</button><button data-visual-direction="light" aria-expanded="false">LIGHT</button><button data-visual-direction="moment" aria-expanded="false">MOMENT</button>
 </div>
 <button class="surprise-develop" data-surprise-develop>SURPRISE ME</button>
 <article class="visual-moves" hidden><h3>TRY THIS</h3><div class="develop-prompts"></div></article>
-<section class="make-as"><h3>MAKE IT AS</h3><div class="make-directions"><button data-make-direction="ai-image" aria-expanded="false">AI IMAGE</button><button data-make-direction="still-life" aria-expanded="false">STILL LIFE</button><button data-make-direction="set-design" aria-expanded="false">SET DESIGN</button></div>
-<article class="make-guide" data-make-guide="ai-image" hidden><section><h4>SUBJECT</h4><ul><li>主体和第二元素的关系是否清楚？</li><li>哪个材质或表面最重要？</li><li>哪个动作瞬间需要保留？</li></ul></section><section><h4>CAMERA</h4><ul><li>确认景别、机位与拍摄距离。</li><li>安排画面留白与主体占比。</li><li>决定背景清晰度与空间层次。</li></ul></section><section><h4>LIGHT</h4><ul><li>确认方向、软硬与整体色调。</li><li>检查背景和主体是否能够分离。</li><li>保留反射、透明与阴影的关键细节。</li></ul></section></article>
-<article class="make-guide" data-make-guide="still-life" hidden><section><h4>MATERIAL</h4><ul><li>列出真实道具与可用的替代材料。</li><li>测试透明度、软硬与湿度。</li><li>确认材料在镜头前的关键细节。</li></ul></section><section><h4>SETUP</h4><ul><li>检查支撑与整体稳定性。</li><li>隐藏鱼线、胶和支架。</li><li>预留调整和重复搭建的位置。</li></ul></section><section><h4>SHOOT</h4><ul><li>准备柔光屏、反光板与黑旗。</li><li>选择能保留关键细节的景深。</li><li>拍摄前再次检查支撑是否穿帮。</li></ul></section></article>
-<article class="make-guide" data-make-guide="set-design" hidden><section><h4>SPACE</h4><ul><li>确定空间位置与观众入口。</li><li>安排观众与作品的观看距离。</li><li>判断关系在空间内外如何延续。</li></ul></section><section><h4>SCALE</h4><ul><li>测试尺度、重复与占领程度。</li><li>比较悬挂、堆积和留白的比例。</li><li>确认人与空间关系是否清楚。</li></ul></section><section><h4>BUILD</h4><ul><li>规划支撑结构与安装顺序。</li><li>测试材料的透光与反光。</li><li>检查运输、固定与现场安全。</li></ul></section></article>
-</section>
+</div></section>
 </section><p class="aside-message" aria-live="polite"></p>
 </section>
 <section class="tray-footer" aria-label="已选词托盘"><div><span>已选词托盘</span></div><div class="tray-mini ingredient-tray"></div><button data-action="clear-random">清除随机词</button><button class="clear-ingredients">清空全部</button></section>
