@@ -134,6 +134,9 @@ h1, h2, h3, p { letter-spacing: 0; }
 .develop-module > header { margin-bottom: 5px; }
 .develop-module > header h3 { font: 600 var(--type-section-title)/1.4 var(--font-en); letter-spacing: .06em; }
 .develop-module > header p { color: var(--muted); }
+.prompt-heading { margin-top: 23px !important; color: var(--muted); font-size: var(--type-meta) !important; }
+.develop-prompts > section { padding: 18px 3px; border-bottom: 1px dotted #77776f88; }
+.develop-prompts > section p { margin-top: 5px; }
 .develop-module > section { padding: 24px 3px; border-bottom: 1px dotted #77776f88; }
 .develop-module h4 { font: 600 var(--type-body)/1.4 var(--font-en); letter-spacing: .09em; }
 .develop-module .module-note { margin-top: 4px; color: var(--muted); }
