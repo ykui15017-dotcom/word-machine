@@ -24,7 +24,7 @@ const patterns=[
   [/箱|碗|盆|托盘|袋|抽屉|缸|罐|瓶|篮|桶|槽|罩|盒|杯|锅/,['container','subject']],
   [/从.+中|从.+口|从.+部|沿.+|顺着.+|向外/,['path']],
   [/放置在|堆积在|贴附在|卡在|悬挂于|包裹在|沉在|夹在/,['placement']],
-  [/流出|滑出|渗出|垂落|扩散|蔓延|倾泻|散落|塌下|堆叠|滴落|流淌|掠过/,['secondary_action']],
+  [/流出|滑出|渗出|垂落|扩散|蔓延|倾泻|散落|塌下|堆叠|滴落|流淌|掠过|飘落/,['secondary_action']],
   [/散开|铺开|零散分布|四周扩开|留下.+痕迹|堆成|形成拖尾|涟漪/,['result']],
   [/潮湿|雨.*湿|塌陷|发皱|起皱|浸泡|浸水|冷白色|破损|褪色|发亮|变形|生锈|透明|柔软|冻结|裂开/,['modifier_state']],
   [/缓慢|局部|疏密不均|断续|凌乱|边缘发亮|贴近表面/,['visual_detail']],
@@ -59,16 +59,19 @@ export function planComposition(ingredients=[]){
     if(role==='subject'&&primary&&word!==primary&&!word.userRoleOverride)role=word.inferredRoles.includes('container')?'container':'secondary';
     roles[role].push({...word,finalRole:role,sentenceRole:role,syntaxRole:role});
   }
+  const relationTargetAvailable=!!(roles.relation.length&&(roles.setting.length||roles.container.length||roles.secondary.length));
   const warnings=[];
   if(!roles.subject.length)warnings.push('还缺少一个主体，什么东西是画面的主角？');
-  if(!roles.container.length&&!roles.setting.length)warnings.push('还缺少一个容器或场域，画面发生在哪里？');
-  if(!roles.placement.length)warnings.push('还缺少一个初始位置或放置方式，主体一开始如何出现？');
-  if(!roles.path.length)warnings.push('还缺少一个路径/出口，元素是如何从内部过渡到外部的？');
+  if(!roles.container.length&&!roles.setting.length&&!relationTargetAvailable)warnings.push('还缺少一个容器或场域，画面发生在哪里？');
+  if(!roles.placement.length&&!relationTargetAvailable)warnings.push('还缺少一个初始位置或放置方式，主体一开始如何出现？');
+  if(!roles.path.length&&!relationTargetAvailable)warnings.push('还缺少一个路径/出口，元素是如何从内部过渡到外部的？');
   if(!roles.secondary_action.length)warnings.push('还缺少一个后续动作，主体会如何继续展开？');
   if(!roles.result.length)warnings.push('还缺少一个结果形态，这些元素最终变成什么样？');
   const explicitSubjects=normalized.filter(w=>w.userRoleOverride==='subject');
   if(explicitSubjects.length>1)warnings.unshift('当前有两个主体，建议保留一个作为主角。');
-  const complete=roles.subject.length&&(roles.container.length||roles.setting.length)&&roles.placement.length&&roles.path.length&&roles.secondary_action.length&&roles.result.length;
+  const actionChainComplete=roles.subject.length&&(roles.container.length||roles.setting.length)&&roles.placement.length&&roles.path.length&&roles.secondary_action.length&&roles.result.length;
+  const relationCompositionComplete=roles.subject.length&&relationTargetAvailable&&roles.secondary_action.length&&roles.result.length;
+  const complete=actionChainComplete||relationCompositionComplete;
   return {status:explicitSubjects.length>1?'conflict':complete?'ok':'incomplete',warnings,roles,ingredients:SCENE_ROLES.flatMap(role=>roles[role])};
 }
 
@@ -76,6 +79,19 @@ const one=(roles,role)=>clean(roles[role][0]);
 const all=(roles,role)=>roles[role].map(clean).filter(Boolean);
 const statefulContainer=(container,state)=>state?`${state.replace(/的$/,'')}的${container}`:container;
 const punctuate=s=>`${s.replace(/[。；，]+$/,'')}。`;
+const bindRelation=(relation,target)=>{
+  if(!relation||!target)return '';
+  if(relation==='缠绕')return `缠绕在${target}上`;
+  if(relation==='贴附')return `贴附在${target}上`;
+  if(relation==='贴合')return `贴合${target}表面`;
+  if(relation==='覆盖')return `覆盖在${target}表面`;
+  if(relation==='包裹')return `包裹着${target}`;
+  if(relation==='围绕')return `围绕${target}`;
+  if(relation==='嵌入')return `嵌入${target}`;
+  if(relation==='悬挂于')return `悬挂于${target}`;
+  return `${relation}${target}`;
+};
+const DISTRIBUTION_RESULTS=/^(散开|铺开|零散分布|向四周扩开|疏密不均地分布)$/;
 
 export function generateDraft(plan,variation=0){
   const r=plan.roles,s=one(r,'subject');
@@ -96,6 +112,19 @@ export function generateDraft(plan,variation=0){
     sentence=`${s}停留在${setting}中，${secondary.join('和')}从四周${relation.replace(/^被/,'')}它，使它像被周围环境吞没的一件日常物。`;
   }else if(setting&&relation&&secondary.length&&action&&result){
     sentence=`${s}${relation}${secondary[0]}掠过${setting}，${secondary.slice(1).join('和')||secondary[0]}随动作延伸，${action}${result==='涟漪'?'落入水中并激起一圈圈涟漪':`并${result}`}。`;
+  }else if(relation&&(secondary.length||container||setting)&&(action||result)){
+    const target=secondary[0]||container||setting;
+    sentence=`${s}${bindRelation(relation,target)}`;
+    if(action&&result){
+      sentence+=DISTRIBUTION_RESULTS.test(result)
+        ?`，部分${s}${action}在${target}四周，并${result}`
+        :`，部分${s}${action}，并${result}`;
+    }else if(action){
+      sentence+=`，部分${s}${action}`;
+    }else if(result){
+      sentence+=DISTRIBUTION_RESULTS.test(result)?`，部分${s}${result}在${target}四周`:`，部分${s}${result}`;
+    }
+    sentence=punctuate(sentence);
   }else{
     const where=place?`${state&&!container?state:''}${place}`:'待确定的场域';
     sentence=`${s}${placement||'位于'}${where}${container?'中':''}`;
