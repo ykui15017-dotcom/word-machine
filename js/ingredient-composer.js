@@ -1,3 +1,5 @@
+import {analyzeVisualGrammar,GRAMMAR_TYPES,renderRelationTarget,renderContainedAction,renderSpaceAction,renderTransformation} from './visual-grammar.js';
+
 /** Sentence roles are deliberately narrower than Word Bank categories.  A
  * category says what a word is; a sentence role says what it does here. */
 export const SCENE_ROLES=['subject','setting','container','modifier_state','placement','path','secondary_action','result','visual_detail','relation','light','perspective','secondary'];
@@ -9,8 +11,8 @@ const EXACT={
   '花丛':['setting'],'湖面':['setting'],'被雨打湿的':['modifier_state'],'被雨水打湿的':['modifier_state'],
   '放置在':['placement'],'堆积在':['placement'],'卡在':['placement'],'贴附在':['placement'],'包裹在':['placement'],'沉在':['placement'],'夹在':['placement'],
   '从缝隙中':['path'],'从箱体缝隙中':['path'],'沿边缘':['path'],'从箱口':['path'],'顺着裂口':['path'],'从底部':['path'],'向外':['path'],'沿台面':['path'],'沿地面':['path'],
-  '流出':['secondary_action'],'滑出':['secondary_action'],'渗出':['secondary_action'],'垂落':['secondary_action'],'散落':['secondary_action'],'扩散':['secondary_action'],'蔓延':['secondary_action'],'倾泻':['secondary_action'],'塌下':['secondary_action'],'堆叠':['secondary_action'],
-  '散开':['result'],'铺开':['result'],'零散分布':['result'],'向四周扩开':['result'],'留下一条痕迹':['result'],'堆成一小片':['result'],'形成拖尾':['result'],'涟漪':['result'],
+  '流出':['secondary_action'],'滑出':['secondary_action'],'渗出':['secondary_action'],'垂落':['secondary_action'],'散落':['secondary_action'],'扩散':['secondary_action'],'蔓延':['secondary_action'],'倾泻':['secondary_action'],'塌下':['secondary_action'],'堆叠':['secondary_action'],'飘落':['secondary_action'],
+  '散开':['result'],'铺开':['result'],'零散分布':['result'],'向四周扩开':['result'],'向四周展开':['result'],'留下一条痕迹':['result'],'堆成一小片':['result'],'形成拖尾':['result'],'形成一条线':['result'],'聚集成一片':['result'],'疏密不均地分布':['result'],'停留在边缘':['result'],'涟漪':['result'],
   '缓慢地':['visual_detail'],'局部地':['visual_detail'],'疏密不均地':['visual_detail'],'断续地':['visual_detail'],'凌乱地':['visual_detail'],'边缘发亮地':['visual_detail'],'贴近表面地':['visual_detail'],
   '冷白顶光':['light'],'冷白漫射光':['light'],'自然散射光':['light'],'逆光':['light'],'局部高光':['light'],'偏灰日光':['light'],
   '俯视':['perspective'],'平视':['perspective'],'贴近地面':['perspective'],'与花平齐':['perspective'],'近距离特写':['perspective'],'低机位':['perspective'],
@@ -25,7 +27,7 @@ const patterns=[
   [/从.+中|从.+口|从.+部|沿.+|顺着.+|向外/,['path']],
   [/放置在|堆积在|贴附在|卡在|悬挂于|包裹在|沉在|夹在/,['placement']],
   [/流出|滑出|渗出|垂落|扩散|蔓延|倾泻|散落|塌下|堆叠|滴落|流淌|掠过|飘落/,['secondary_action']],
-  [/散开|铺开|零散分布|四周扩开|留下.+痕迹|堆成|形成拖尾|涟漪/,['result']],
+  [/散开|铺开|零散分布|四周扩开|四周展开|留下.+痕迹|堆成|形成拖尾|形成一条线|聚集成一片|疏密不均地分布|停留在边缘|涟漪/,['result']],
   [/潮湿|雨.*湿|塌陷|发皱|起皱|浸泡|浸水|冷白色|破损|褪色|发亮|变形|生锈|透明|柔软|冻结|裂开/,['modifier_state']],
   [/缓慢|局部|疏密不均|断续|凌乱|边缘发亮|贴近表面/,['visual_detail']],
   [/靠近|穿过|贴合|覆盖|包围|被包围|悬挂|缠绕|围绕|连接|嵌入/,['relation']]
@@ -50,48 +52,48 @@ export function normalizeIngredient(item,index=0){
   return {...item,inferredRoles,inferredRole:inferredRoles[0],sentenceRole:finalRole,syntaxRole:finalRole,userRoleOverride:override,finalRole,selectionIndex:index};
 }
 
+const WARNING_TEXT={
+  subject:'还缺少一个主体，什么东西是画面的主角？',
+  target:'还缺少一个作用对象，主体正在和什么东西发生关系？',
+  relation:'还缺少一个核心关系，两个对象如何接触、连接或作用？',
+  support:'还缺少一个容器或场域，画面发生在哪里？',
+  placement:'还缺少一个初始位置或放置方式，主体一开始如何出现？',
+  path:'还缺少一个路径/出口，元素是如何从内部过渡到外部的？',
+  secondary_action:'还缺少一个后续动作，主体会如何继续展开？',
+  result:'还缺少一个结果形态，这些元素最终变成什么样？'
+};
+
 export function planComposition(ingredients=[]){
   const normalized=ingredients.map(normalizeIngredient);
-  let primary=normalized.find(w=>w.userRoleOverride==='subject')||normalized.find(w=>w.finalRole==='subject')||normalized.find(w=>w.inferredRoles.includes('subject'));
+  const primary=normalized.find(w=>w.userRoleOverride==='subject')||normalized.find(w=>w.finalRole==='subject')||normalized.find(w=>w.inferredRoles.includes('subject'));
   const roles=Object.fromEntries(SCENE_ROLES.map(role=>[role,[]]));
   for(const word of normalized){
     let role=word.finalRole;
     if(role==='subject'&&primary&&word!==primary&&!word.userRoleOverride)role=word.inferredRoles.includes('container')?'container':'secondary';
     roles[role].push({...word,finalRole:role,sentenceRole:role,syntaxRole:role});
   }
-  const relationTargetAvailable=!!(roles.relation.length&&(roles.setting.length||roles.container.length||roles.secondary.length));
-  const warnings=[];
-  if(!roles.subject.length)warnings.push('还缺少一个主体，什么东西是画面的主角？');
-  if(!roles.container.length&&!roles.setting.length&&!relationTargetAvailable)warnings.push('还缺少一个容器或场域，画面发生在哪里？');
-  if(!roles.placement.length&&!relationTargetAvailable)warnings.push('还缺少一个初始位置或放置方式，主体一开始如何出现？');
-  if(!roles.path.length&&!relationTargetAvailable)warnings.push('还缺少一个路径/出口，元素是如何从内部过渡到外部的？');
-  if(!roles.secondary_action.length)warnings.push('还缺少一个后续动作，主体会如何继续展开？');
-  if(!roles.result.length)warnings.push('还缺少一个结果形态，这些元素最终变成什么样？');
+
+  const grammar=analyzeVisualGrammar(roles);
+  const warnings=grammar.missingRoles.map(role=>WARNING_TEXT[role]).filter(Boolean);
   const explicitSubjects=normalized.filter(w=>w.userRoleOverride==='subject');
   if(explicitSubjects.length>1)warnings.unshift('当前有两个主体，建议保留一个作为主角。');
-  const actionChainComplete=roles.subject.length&&(roles.container.length||roles.setting.length)&&roles.placement.length&&roles.path.length&&roles.secondary_action.length&&roles.result.length;
-  const relationCompositionComplete=roles.subject.length&&relationTargetAvailable&&roles.secondary_action.length&&roles.result.length;
-  const complete=actionChainComplete||relationCompositionComplete;
-  return {status:explicitSubjects.length>1?'conflict':complete?'ok':'incomplete',warnings,roles,ingredients:SCENE_ROLES.flatMap(role=>roles[role])};
+  const status=explicitSubjects.length>1?'conflict':grammar.complete?'ok':'incomplete';
+
+  return {
+    status,
+    warnings,
+    roles,
+    grammarType:grammar.type,
+    grammarTarget:grammar.target,
+    missingRoles:grammar.missingRoles,
+    ingredients:SCENE_ROLES.flatMap(role=>roles[role])
+  };
 }
 
 const one=(roles,role)=>clean(roles[role][0]);
 const all=(roles,role)=>roles[role].map(clean).filter(Boolean);
 const statefulContainer=(container,state)=>state?`${state.replace(/的$/,'')}的${container}`:container;
 const punctuate=s=>`${s.replace(/[。；，]+$/,'')}。`;
-const bindRelation=(relation,target)=>{
-  if(!relation||!target)return '';
-  if(relation==='缠绕')return `缠绕在${target}上`;
-  if(relation==='贴附')return `贴附在${target}上`;
-  if(relation==='贴合')return `贴合${target}表面`;
-  if(relation==='覆盖')return `覆盖在${target}表面`;
-  if(relation==='包裹')return `包裹着${target}`;
-  if(relation==='围绕')return `围绕${target}`;
-  if(relation==='嵌入')return `嵌入${target}`;
-  if(relation==='悬挂于')return `悬挂于${target}`;
-  return `${relation}${target}`;
-};
-const DISTRIBUTION_RESULTS=/^(散开|铺开|零散分布|向四周扩开|疏密不均地分布)$/;
 
 export function generateDraft(plan,variation=0){
   const r=plan.roles,s=one(r,'subject');
@@ -101,6 +103,8 @@ export function generateDraft(plan,variation=0){
   const relation=one(r,'relation'),details=all(r,'visual_detail'),secondary=all(r,'secondary');
   const place=container?statefulContainer(container,state):setting;
   let sentence;
+
+  // Preserve the established inside-to-outside fixture and its alternate phrasing.
   if(container&&placement&&path&&action&&result){
     const templates=[
       `${s}被${placement}${place}中，随后${path}${details[0]||''}${action}，并在${/^(形成|留)/.test(result)?'外部':''}${/^(形成|留)/.test(result)?result:`外部${result}`}。`,
@@ -108,23 +112,21 @@ export function generateDraft(plan,variation=0){
       `${s}原本位于${place}内部，随后${path}${action}，在外部${result}。`,
       `将${s}放入${place}，让它${path}${action}，最后在外部${result}。`
     ];sentence=templates[variation%templates.length];
+  // Keep the two historical fixtures stable before the general grammar layer.
   }else if(setting&&secondary.length>=2&&relation){
     sentence=`${s}停留在${setting}中，${secondary.join('和')}从四周${relation.replace(/^被/,'')}它，使它像被周围环境吞没的一件日常物。`;
-  }else if(setting&&relation&&secondary.length&&action&&result){
-    sentence=`${s}${relation}${secondary[0]}掠过${setting}，${secondary.slice(1).join('和')||secondary[0]}随动作延伸，${action}${result==='涟漪'?'落入水中并激起一圈圈涟漪':`并${result}`}。`;
-  }else if(relation&&(secondary.length||container||setting)&&(action||result)){
-    const target=secondary[0]||container||setting;
-    sentence=`${s}${bindRelation(relation,target)}`;
-    if(action&&result){
-      sentence+=DISTRIBUTION_RESULTS.test(result)
-        ?`，部分${s}${action}在${target}四周，并${result}`
-        :`，部分${s}${action}，并${result}`;
-    }else if(action){
-      sentence+=`，部分${s}${action}`;
-    }else if(result){
-      sentence+=DISTRIBUTION_RESULTS.test(result)?`，部分${s}${result}在${target}四周`:`，部分${s}${result}`;
-    }
-    sentence=punctuate(sentence);
+  }else if(setting&&relation&&secondary.length&&action&&result&&result==='涟漪'){
+    sentence=`${s}${relation}${secondary[0]}掠过${setting}，${secondary.slice(1).join('和')||secondary[0]}随动作延伸，${action}落入水中并激起一圈圈涟漪。`;
+  }else if(plan.grammarType===GRAMMAR_TYPES.RELATION_TARGET){
+    sentence=renderRelationTarget(r,plan.grammarTarget,variation);
+  }else if(plan.grammarType===GRAMMAR_TYPES.CONTAINED_ACTION){
+    sentence=renderContainedAction(r,variation);
+  }else if(plan.grammarType===GRAMMAR_TYPES.SPACE_ACTION){
+    sentence=renderSpaceAction(r,variation);
+  }else if(plan.grammarType===GRAMMAR_TYPES.TRANSFORMATION){
+    sentence=renderTransformation(r,variation);
+  }else if(plan.grammarType===GRAMMAR_TYPES.RELATION_OPEN&&plan.grammarTarget){
+    sentence=`${s}与${clean(plan.grammarTarget)}已经进入同一画面，但两者之间的核心关系还未确定。`;
   }else{
     const where=place?`${state&&!container?state:''}${place}`:'待确定的场域';
     sentence=`${s}${placement||'位于'}${where}${container?'中':''}`;
@@ -133,6 +135,7 @@ export function generateDraft(plan,variation=0){
     if(relation&&secondary.length)sentence+=`；${secondary.join('和')}${relation}${s}`;
     sentence=punctuate(variation%2?sentence.replace('位于','暂留在'):sentence);
   }
+
   const perspective=all(r,'perspective'),light=all(r,'light');
   if(perspective.length||light.length){
     const view=perspective.length?`画面采用${perspective.join('、')}的视角`:'';
