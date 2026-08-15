@@ -1,4 +1,4 @@
-import {ELIGIBLE_RANDOM_WORDS} from '../data/constrained-random-pool.js';
+import {candidatesForRoles} from '../data/random-word-source.js';
 import {normalizeIngredient,composeIngredients} from './ingredient-composer.js';
 import {missingResultRoles} from './result-state.js';
 
@@ -13,15 +13,14 @@ export const STRUCTURE=[
 ];
 const roleOf=word=>normalizeIngredient(word).finalRole;
 const slotFor=word=>STRUCTURE.find(slot=>slot.roles.includes(roleOf(word)));
-const pick=(items,rng)=>items[Math.floor(rng()*items.length)];
+const pick=(items,rng)=>items.length?items[Math.min(items.length-1,Math.floor(rng()*items.length))]:null;
+const withoutUsedText=(items,current)=>{const texts=new Set(current.map(word=>word.text));return items.filter(word=>!texts.has(word.text))};
 const randomFor=(slot,current,rng)=>{
-  const ids=new Set(current.map(word=>word.id));
-  return pick(ELIGIBLE_RANDOM_WORDS.filter(word=>slot.roles.includes(roleOf(word))&&!ids.has(word.id)),rng);
+  return pick(withoutUsedText(candidatesForRoles(slot.roles),current),rng);
 };
 const randomForMissing=(missing,current,rng)=>{
-  const ids=new Set(current.map(word=>word.id));
   const roles=missing.role==='support'?['setting','container']:[missing.role];
-  return pick(ELIGIBLE_RANDOM_WORDS.filter(word=>roles.includes(roleOf(word))&&!ids.has(word.id)),rng);
+  return pick(withoutUsedText(candidatesForRoles(roles),current),rng);
 };
 const asRandom=word=>({...word,source:'random',locked:false});
 
@@ -62,15 +61,28 @@ export function addManualToMachine(items=[],word){
 }
 export function replaceRandom(items=[],rng=Math.random){
   const fixed=items.filter(word=>word.source!=='random');
-  return items.map(word=>{
-    if(word.source!=='random'||word.locked)return word;
-    const slot=slotFor(word);if(!slot)return word;
-    const replacement=randomFor(slot,[...fixed,...items],rng);
-    return replacement?asRandom(replacement):word;
-  });
+  const replaced=[];
+  for(const word of items){
+    if(word.source!=='random'||word.locked){replaced.push(word);continue}
+    const slot=slotFor(word);if(!slot){replaced.push(word);continue}
+    const otherKept=items.filter(item=>item===word||item.source!=='random'||item.locked).filter(item=>item!==word);
+    const replacement=randomFor(slot,[...fixed,...otherKept,...replaced],rng);
+    replaced.push(replacement?asRandom(replacement):word);
+  }
+  return replaced;
 }
-export function fullRandom(rng=Math.random,count=5){
-  const result=[];
-  for(const slot of STRUCTURE.slice(0,Math.max(4,Math.min(5,count)))){const word=randomFor(slot,result,rng);if(word)result.push(asRandom(word))}
-  return result;
+export function fullRandom(itemsOrRng=[],rngOrCount=Math.random,count=5){
+  // Keep the old fullRandom(rng, count) API for callers and deterministic tests.
+  const legacy=typeof itemsOrRng==='function';
+  const items=legacy?[]:itemsOrRng;
+  const rng=legacy?itemsOrRng:rngOrCount;
+  const requested=legacy&&typeof rngOrCount==='number'?rngOrCount:count;
+  const manual=items.filter(word=>word.source!=='random');
+  const randomCount=Math.min(Math.max(4,Math.min(MACHINE_LIMIT,requested)),MANUAL_LIMIT-manual.length);
+  const random=[];
+  for(const slot of STRUCTURE.slice(0,randomCount)){
+    const word=randomFor(slot,[...manual,...random],rng);
+    if(word)random.push(asRandom(word));
+  }
+  return [...manual,...random];
 }

@@ -163,7 +163,7 @@ document.addEventListener('click',event=>{
     say(complete?'当前组合结构已基本完整，可换随机词、继续展开，或保存灵感。':current.some(word=>word.source==='manual')?'已检测到手动选词，随机功能将只补足缺失类别。':'已补足当前缺失类别。');
   }
   if(action==='replace-random'){setIngredients(replaceRandom(getIngredients()));hasResult=false;renderTray();say('已替换随机词，手动词保持不变。')}
-  if(action==='full-random'){setIngredients(fullRandom());hasResult=false;renderTray();say('已清空原组合并生成完整随机结构。')}
+  if(action==='full-random'){setIngredients(fullRandom(getIngredients()));hasResult=false;renderTray();say('已更新随机组；手动词保持不变。')}
   if(action==='clear-random'){clearRandomIngredients();hasResult=false;renderTray();say('已清除随机词。')}
   if(action==='compose'){spinDial();compose(false)}
   if(action==='another'){spinDial();compose(true)}
