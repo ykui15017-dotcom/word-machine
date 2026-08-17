@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BASE_WORDS,CATEGORIES} from '../data/words/index.js';
 import {DROP_SIZE,DROP_GROUPS,uniquePool,freshDrop,replaceSlot,removeSlot,toggleLock,formatDrop} from '../js/element-drop.js';
-import {createDoodle,doodleSvg,DOODLE_TEMPLATE_COUNT} from '../js/doodle-card.js';
+import {createVisualTrace,visualTraceSvg,colorForWord,DOODLE_TEMPLATE_COUNT} from '../js/doodle-card.js';
 
 test('V2 corpus contains thousands of unique atomic elements',()=>{
   assert.ok(BASE_WORDS.length>=2000,`expected at least 2000 words, got ${BASE_WORDS.length}`);
@@ -40,10 +40,12 @@ test('a new drop refills a shortened selection back to seven while preserving lo
   assert.equal(next[0].text,locked.text);
   assert.equal(next[0].locked,true);
 });
-test('doodle cards use eight templates, retain a signature, and render local SVG',()=>{
-  const words=freshDrop([],uniquePool(BASE_WORDS),()=>0.32),first=createDoodle(words,[],()=>0.32),second=createDoodle(words,[first.signature],()=>0.61);
-  assert.equal(DOODLE_TEMPLATE_COUNT,8);
-  assert.notEqual(first.signature,second.signature);
-  assert.match(doodleSvg(first,words),/^<svg[\s\S]*<\/svg>$/);
+test('visual traces are deterministic, category-aware, and render local SVG',()=>{
+  const words=freshDrop([],uniquePool(BASE_WORDS),()=>0.32),first=createVisualTrace(words),second=createVisualTrace(words);
+  assert.equal(DOODLE_TEMPLATE_COUNT,12);
+  assert.equal(first.signature,second.signature);
+  assert.equal(visualTraceSvg(first,words),visualTraceSvg(second,words));
+  assert.match(visualTraceSvg(first,words),/^<svg[\s\S]*<\/svg>$/);
+  assert.equal(colorForWord(words[0]),colorForWord(words[0]));
   assert.deepEqual(first.words,words.map(word=>word.text));
 });
