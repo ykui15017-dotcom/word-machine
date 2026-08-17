@@ -12,3 +12,23 @@
 .saved-v2 .saved-words{font-size:18px;line-height:1.9}.saved-v2 .saved-card{min-height:160px}.saved-v2 .subtitle{margin-bottom:32px}
 @media(max-width:760px){.drop-slots{grid-template-columns:repeat(2,1fr)}.drop-card:last-child{grid-column:1/-1;min-height:125px}.picker-results{grid-template-columns:repeat(2,1fr)}.desk-grid{grid-template-columns:1fr;gap:25px}.my-words-preview{padding:22px 0 0;border-left:0;border-top:1px solid var(--line)}.bank-word{grid-template-columns:minmax(0,1fr) 54px 112px}.bank-v2 .machine-dock>header,.my-word-panel>header{align-items:flex-start;flex-direction:column;gap:5px}.dock-ingredients{grid-template-columns:repeat(5,minmax(76px,1fr));overflow-x:auto}.dock-slot{min-width:76px}}
 @media(max-width:460px){.drop-main{width:calc(100% - 24px);padding-top:36px}.brand{font-size:14px}.hero-wordmark{padding-inline:10px}.hero-wordmark span{font-size:9px;letter-spacing:.15em}.hero-wordmark strong{font-size:27px;letter-spacing:.11em}.drop-machine{padding:20px 14px}.drop-slots{gap:7px}.drop-card{min-height:145px}.drop-line{font-size:16px}.drop-controls{display:grid;grid-template-columns:repeat(2,1fr)}.drop-controls button{padding-inline:8px}.picker-results{grid-template-columns:1fr}.personal-desk{margin-top:38px}.desk-heading h2{font-size:19px}.quick-word-form{grid-template-columns:minmax(0,1fr) auto}.quick-word-form label{grid-column:1/-1}.quick-word-form select{min-width:0}.my-word-panel{padding:18px}.my-word-form>div{flex-direction:column}.bank-v2 .word-index{align-items:flex-start;flex-direction:column;gap:0}.bank-word{grid-template-columns:minmax(0,1fr) 48px 100px}.add-machine{font-size:12px}}
+
+/* The visual note is deliberately quieter and narrower than the drop machine. */
+.drop-slots{grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.drop-card{min-height:154px;padding-inline:7px}
+.drop-card strong{font-size:clamp(16px,1.75vw,21px)}
+.visual-note{width:min(100%,620px);margin:52px auto 0}
+.visual-note>header{display:flex;align-items:baseline;justify-content:space-between;margin:0 8px 10px}
+.visual-note h2{margin:0;font:600 13px/1 var(--font-en);letter-spacing:.13em}
+.doodle-paper{position:relative;padding:13px 18px 10px;border:1px solid #77756b;background:#f4eddb;box-shadow:3px 4px 0 #3e3d3612;transform:rotate(-.18deg);color:#34352f}
+.doodle-paper:before{content:"";position:absolute;inset:7px;border:1px solid #66645b22;pointer-events:none}
+.doodle-paper svg{display:block;width:100%;height:auto;max-height:245px}
+.doodle-ink path,.doodle-circle{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.doodle-ink text{fill:currentColor;font:500 13px var(--font-zh-display)}
+.doodle-ink .doodle-note{font:italic 12px var(--font-en);letter-spacing:.08em}
+.doodle-ink .doodle-faint{stroke-width:1.4;opacity:.62}
+.doodle-ink .doodle-arrow{stroke-width:1.6}
+.doodle-ink .doodle-circle{stroke-width:1.2;stroke-dasharray:2 5;opacity:.72}
+@media(max-width:900px) and (min-width:761px){.drop-slots{grid-template-columns:repeat(4,1fr)}.drop-card{min-height:140px}}
+@media(max-width:760px){.drop-slots{grid-template-columns:repeat(2,1fr)}.visual-note{width:min(94%,560px);margin-top:40px}}
+@media(max-width:460px){.visual-note>header{margin-inline:2px}.doodle-paper{padding:8px}.doodle-paper svg{min-height:170px}.drop-card{min-height:138px}}

@@ -1,6 +1,6 @@
-# WORD MACHINE — Five Visual Elements
+# WORD MACHINE — Seven Visual Elements
 
-WORD MACHINE 是一个可直接部署到 GitHub Pages 的元素词仓。它不生成图片、不调用 AI，也不自动完成联想：每次只掉落五个独立视觉元素词，交给使用者继续组合。
+WORD MACHINE 是一个可直接部署到 GitHub Pages 的元素词仓。它不生成图片、不调用 AI，也不自动完成联想：每次只掉落七个独立视觉元素词，交给使用者继续组合。
 
 ## 当前功能
 
@@ -16,13 +16,13 @@ WORD MACHINE 是一个可直接部署到 GitHub Pages 的元素词仓。它不�
 ## 核心文件
 
 ```text
-index.html                    # 五词机器
+index.html                    # 七词机器与规则式视觉便签
 word-bank.html                # 完整词仓与 MY WORDS
 saved.html                    # 纯词组收藏
 observations.html             # 旧地址兼容跳转
 css/styles.css                # 原有全站视觉
-css/word-machine-v2.css       # 五词模式页面样式
-js/element-drop.js            # 五词平衡抽取、锁定、替换与格式化
+css/word-machine-v2.css       # 七词模式与视觉便签页面样式
+js/element-drop.js            # 七词平衡抽取、锁定、替换与格式化
 js/machine.js                 # 主页交互
 js/wordbank.js                # 词仓与自定义词交互
 js/saved.js                   # 收藏交互
@@ -55,4 +55,4 @@ node --test tests/*.test.js
 
 ## 数据与隐私
 
-网站没有账户、后端、分析脚本或 AI API。自定义词、当前五词与收藏只存在当前浏览器的 `localStorage` 中；清理站点数据会删除它们。
+网站没有账户、后端、分析脚本或 AI API。自定义词、当前七词、视觉便签与收藏只存在当前浏览器的 `localStorage` 中；清理站点数据会删除它们。
