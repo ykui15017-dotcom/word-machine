@@ -1,7 +1,7 @@
 import {BASE_WORDS,CATEGORY_DISPLAY_LABELS as CATEGORY_LABELS} from '../data/words/index.js';
-import {getMyWords,getHiddenWordIds,getElementDrop,setElementDrop,saveDrop,getDoodle,setDoodle,getDoodleHistory,setDoodleHistory} from './storage.js';
+import {getMyWords,getHiddenWordIds,getElementDrop,setElementDrop,saveDrop,getDoodle,setDoodle} from './storage.js';
 import {DROP_SIZE,uniquePool,freshDrop,replaceSlot,removeSlot,toggleLock,unlockAll,formatDrop} from './element-drop.js';
-import {createDoodle,doodleSvg} from './doodle-card.js';
+import {createVisualTrace,visualTraceSvg} from './doodle-card.js';
 import {initNav,escapeHtml} from './common.js';
 
 initNav();
@@ -28,11 +28,9 @@ if(!words.length){
 function say(text){const toast=document.querySelector('.toast');clearTimeout(toastTimer);toast.textContent=text;toast.classList.add('show');toastTimer=setTimeout(()=>toast.classList.remove('show'),2200)}
 const sameDoodleWords=()=>doodle?.words?.join('\u0000')===words.map(word=>word.text).join('\u0000');
 function refreshDoodle(){
-  if(words.length<2)return;
-  const history=getDoodleHistory();
-  doodle=createDoodle(words,history);
+  if(!words.length)return;
+  doodle=createVisualTrace(words);
   setDoodle(doodle);
-  setDoodleHistory([doodle.signature,...history.filter(signature=>signature!==doodle.signature)]);
 }
 function render(){
   slots.innerHTML=words.map((word,index)=>`<article class="drop-card ${word.locked?'is-locked':''}">
@@ -43,10 +41,10 @@ function render(){
     <div class="card-actions"><button class="replace-word" data-replace="${index}">替换</button><button class="remove-word" data-remove="${index}" aria-label="从本轮移除 ${escapeHtml(word.text)}">删除</button></div>
   </article>`).join('');
   line.textContent=formatDrop(words);
-  visualNote.hidden=words.length<2;
-  if(words.length>=2){
+  visualNote.hidden=!words.length;
+  if(words.length){
     if(!sameDoodleWords())refreshDoodle();
-    doodlePaper.innerHTML=doodleSvg(doodle,words);
+    doodlePaper.innerHTML=visualTraceSvg(doodle,words);
   }else{
     doodlePaper.innerHTML='';
   }
@@ -90,7 +88,7 @@ document.querySelector('.drop-controls').addEventListener('click',event=>{
   if(action==='copy')copyCurrent();
   if(action==='save'){
     if(!words.length){say('当前没有可保存的词。');return}
-    saveDrop({words:words.map(word=>({...word})),doodle:words.length>=2?{...doodle}:null,format:'elements-v2'});say('已保存这组词。');
+    saveDrop({words:words.map(word=>({...word})),doodle:words.length?{...doodle}:null,format:'elements-v2'});say('已保存这组词。');
   }
 });
 document.querySelector('[data-action="unlock"]').addEventListener('click',()=>{words=unlockAll(words);persist();say('当前词语已全部解锁。')});
