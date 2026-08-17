@@ -1,4 +1,4 @@
-const KEYS={words:'wm-my-words-v1',saved:'wm-saved-v1',machine:'wm-machine-v1',ingredients:'wm-ingredients-v3',hiddenWords:'wm-hidden-words-v1',drop:'wm-drop-v2',dropHistory:'wm-drop-history-v1'};
+const KEYS={words:'wm-my-words-v1',saved:'wm-saved-v1',machine:'wm-machine-v1',ingredients:'wm-ingredients-v3',hiddenWords:'wm-hidden-words-v1',drop:'wm-drop-v2'};
 const read=(key,fallback=[])=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const write=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
 const LEGACY_CATEGORY={living:'life',organic:'organic_matter',detail:'material',observation:'material',concept:'state'};
@@ -37,24 +37,3 @@ export const getElementDrop=()=>{
   return Array.isArray(legacy?.words)?legacy.words.slice(0,5).map(normalizeDropWord):[];
 };
 export const setElementDrop=words=>write(KEYS.drop,words.slice(0,5).map(normalizeDropWord));
-
-const DROP_HISTORY_LIMIT=5;
-const dropKey=words=>words.slice(0,5).map(word=>word?.text||'').join('\u241f');
-export const getRecentElementDrops=()=>read(KEYS.dropHistory)
-  .filter(entry=>Array.isArray(entry?.words)&&entry.words.length)
-  .slice(0,DROP_HISTORY_LIMIT)
-  .map(entry=>({...entry,words:entry.words.slice(0,5).map(normalizeDropWord)}));
-export const rememberElementDrop=words=>{
-  const normalized=words.slice(0,5).filter(Boolean).map(normalizeDropWord);
-  if(!normalized.length)return getRecentElementDrops();
-  const key=dropKey(normalized);
-  const history=getRecentElementDrops().filter(entry=>dropKey(entry.words)!==key);
-  history.unshift({
-    id:`drop_${Date.now()}`,
-    createdAt:new Date().toISOString(),
-    words:normalized.map(word=>({...word,locked:false}))
-  });
-  const next=history.slice(0,DROP_HISTORY_LIMIT);
-  write(KEYS.dropHistory,next);
-  return next;
-};
