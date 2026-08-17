@@ -34,6 +34,33 @@
     <div class="picker-results"></div>
     <a class="picker-bank-link" href="./word-bank.html">进入完整词仓，也可以添加自己的词 →</a>
   </section>
+
+  <section class="personal-desk" aria-labelledby="personal-desk-title">
+    <header class="desk-heading">
+      <span class="folio">PERSONAL DESK</span>
+      <h2 id="personal-desk-title">把想到的词留下来。</h2>
+      <p>这里不替你扩写，只保存你自己的视觉元素。</p>
+    </header>
+    <div class="desk-grid">
+      <section class="quick-word-block" aria-labelledby="quick-word-title">
+        <header><h3 id="quick-word-title">ADD YOUR WORD</h3><span>QUICK ADD</span></header>
+        <form class="quick-word-form">
+          <label><span class="sr-only">输入自己的词语</span><input type="text" maxlength="120" placeholder="例如：胶痕、湿纸箱" required></label>
+          <select aria-label="选择词语分类"></select>
+          <button type="submit">+ ADD</button>
+        </form>
+        <p>可以用“、”、逗号或换行一次添加多个词。添加后会进入 WORD BANK → MY WORDS，也会参与之后的随机掉落。</p>
+      </section>
+      <section class="my-words-preview" aria-labelledby="my-words-preview-title">
+        <header><h3 id="my-words-preview-title">MY WORDS</h3><a href="./word-bank.html#my-words">VIEW ALL →</a></header>
+        <div class="my-word-chips" aria-live="polite"></div>
+      </section>
+    </div>
+    <section class="recent-drops-block" aria-labelledby="recent-drops-title">
+      <header><div><h3 id="recent-drops-title">RECENT DROPS</h3><span>最近出现过的组合</span></div><small>保存在当前浏览器</small></header>
+      <div class="recent-drops" aria-live="polite"></div>
+    </section>
+  </section>
 </main>
 <footer class="site-footer">WORD MACHINE · five loose elements · <span class="year"></span></footer>
 <div class="toast" role="status" aria-live="polite"></div>
