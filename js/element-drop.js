@@ -21,6 +21,12 @@ export function replaceSlot(words,index,word){
   else next[index]=sourceFor(word,'manual');
   return next;
 }
+export function removeSlot(words,index){
+  const next=words.slice(0,DROP_SIZE);
+  if(index<0||index>=next.length)return next;
+  next.splice(index,1);
+  return next;
+}
 export function toggleLock(words,index){return words.map((word,i)=>i===index?{...word,locked:!word.locked}:word)}
 export function unlockAll(words){return words.map(word=>({...word,locked:false}))}
 export const formatDrop=words=>words.slice(0,DROP_SIZE).map(word=>word.text).join('、');
