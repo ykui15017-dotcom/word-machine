@@ -1,48 +1,60 @@
-import {BASE_WORDS,CATEGORIES,CATEGORY_LABELS} from '../data/words/index.js';
-import {getMyWords,removeMyWord,getHiddenWordIds,hideBaseWord,restoreHiddenWords,getIngredients,setIngredients,removeIngredient,clearIngredients} from './storage.js';
+import {BASE_WORDS,CATEGORIES,CATEGORY_LABELS,CATEGORY_DISPLAY_LABELS} from '../data/words/index.js';
+import {getMyWords,addMyWord,removeMyWord,getHiddenWordIds,hideBaseWord,restoreHiddenWords,getElementDrop,setElementDrop} from './storage.js';
+import {DROP_SIZE,uniquePool,freshDrop,replaceSlot} from './element-drop.js';
 import {initNav,escapeHtml} from './common.js';
-import {addManualToMachine} from './machine-logic.js';
 
 initNav();
-const filters=document.querySelector('.filters'),list=document.querySelector('.word-list'),input=document.querySelector('.search'),count=document.querySelector('.bank-count');
-const guide=document.querySelector('.intent-guide');
+const LABELS={...CATEGORY_LABELS,...CATEGORY_DISPLAY_LABELS};
+const filters=document.querySelector('.filters');
+const list=document.querySelector('.word-list');
+const input=document.querySelector('.search');
+const count=document.querySelector('.bank-count');
 const restoreButton=document.querySelector('.restore-hidden');
-const intent=new URLSearchParams(location.search).get('intent');
-const intentConfig={
-  path:{label:'路径 / 出口',description:'主体经过哪里、从哪里出来或沿哪里移动。',roles:['path']},
-  result:{label:'结果形态',description:'动作完成后，元素最终呈现出的空间状态。',roles:['result']}
-};
-const currentIntent=intentConfig[intent];
-let active='all';
+const form=document.querySelector('.my-word-form');
+const categorySelect=form.querySelector('select');
+let active=location.hash==='#my-words'?'my-words':'all';
+let selectedSlot=0;
 let toastTimer;
-const labels=['all',...CATEGORIES,'my words'];
-filters.innerHTML=labels.map((x,i)=>`<button class="filter ${i?'':'active'}" data-cat="${x.replace(' ','-')}">${CATEGORY_LABELS[x]||x.toUpperCase()}</button>`).join('');
-const allWords=()=>{const hidden=new Set(getHiddenWordIds());return [...BASE_WORDS.filter(word=>!hidden.has(word.id)),...getMyWords()]};
-const roleOf=word=>word.syntaxRole||word.sentenceRole||word.role;
-const matchesIntent=word=>!currentIntent||currentIntent.roles.includes(roleOf(word))||word.tags?.some(tag=>currentIntent.roles.includes(tag));
+let words=getElementDrop();
 
-if(currentIntent){
-  guide.hidden=false;
-  guide.innerHTML=`<span>YOU ARE LOOKING FOR</span><strong>${escapeHtml(currentIntent.label)}</strong><p>${escapeHtml(currentIntent.description)}</p><a href="./index.html">← BACK TO MACHINE</a>`;
-}
+categorySelect.innerHTML=CATEGORIES.map(category=>`<option value="${category}">${LABELS[category]}</option>`).join('');
+if(words.length!==DROP_SIZE){words=freshDrop(words,uniquePool(BASE_WORDS,getMyWords(),getHiddenWordIds()));setElementDrop(words)}
 
-function renderDock(){
-  const chosen=getIngredients(),dock=document.querySelector('.dock-ingredients');
-  const cards=chosen.length?chosen.map(word=>`<span class="dock-card"><small>${escapeHtml(word.category)}</small>${escapeHtml(word.text)}<button data-remove="${escapeHtml(word.id)}" aria-label="删除 ${escapeHtml(word.text)}">×</button></span>`).join(''):'<p class="dock-empty">No ingredients yet — add a word from the index.</p>';
-  dock.innerHTML=cards;
-}
-function say(text){const toast=document.querySelector('.toast');clearTimeout(toastTimer);toast.textContent=text;toast.classList.add('show');toastTimer=setTimeout(()=>toast.classList.remove('show'),3000)}
+function allWords(){return uniquePool(BASE_WORDS,getMyWords(),getHiddenWordIds())}
+function say(text){const toast=document.querySelector('.toast');clearTimeout(toastTimer);toast.textContent=text;toast.classList.add('show');toastTimer=setTimeout(()=>toast.classList.remove('show'),2200)}
+function renderFilters(){const labels=[['all','全部'],...CATEGORIES.map(category=>[category,LABELS[category]]),['my-words','我的词语']];filters.innerHTML=labels.map(([value,label])=>`<button class="filter ${active===value?'active':''}" data-cat="${value}">${escapeHtml(label)}</button>`).join('')}
+function renderDock(){document.querySelector('.dock-ingredients').innerHTML=words.map((word,index)=>`<button class="dock-slot ${selectedSlot===index?'active':''}" data-slot="${index}"><span>0${index+1}</span><strong>${escapeHtml(word.text)}</strong><small>${escapeHtml(LABELS[word.category]||word.category)}</small></button>`).join('')}
 function render(){
-  const q=input.value.trim().toLowerCase(),chosen=new Set(getIngredients().map(word=>word.id));
-  const shown=allWords().filter(w=>matchesIntent(w)&&(active==='all'||(active==='my-words'?w.source==='user':w.category===active))&&(!q||[w.text,w.category,...w.tags].join(' ').toLowerCase().includes(q)));
-  count.textContent=`${shown.length} VISUAL UNITS`;
-  list.innerHTML=shown.slice(0,300).map(w=>`<article class="bank-word"><span class="word-index">${escapeHtml(w.text)}</span><button class="delete-word" data-delete="${escapeHtml(w.id)}" aria-label="从词仓删除 ${escapeHtml(w.text)}">DELETE</button><button class="add-machine ${chosen.has(w.id)?'added':''}" data-id="${escapeHtml(w.id)}">${chosen.has(w.id)?'✓ IN MACHINE':'+ ADD TO MACHINE'}</button></article>`).join('')+(shown.length>300?'<p class="empty">继续输入关键词以缩小结果。</p>':'');
+  renderFilters();
+  const query=input.value.trim().toLowerCase();
+  const all=allWords();
+  const shown=all.filter(word=>(active==='all'||(active==='my-words'?word.source==='user':word.category===active))&&(!query||[word.text,word.category,...(word.tags||[])].join(' ').toLowerCase().includes(query)));
+  count.textContent=`${shown.length} / ${all.length} 个元素词`;
+  const currentTexts=new Set(words.map(word=>word.text));
+  list.innerHTML=shown.slice(0,500).map(word=>`<article class="bank-word"><span class="word-index"><b>${escapeHtml(word.text)}</b><small>${escapeHtml(LABELS[word.category]||word.category)}</small></span><button class="delete-word" data-delete="${escapeHtml(word.id)}">${word.source==='user'?'删除':'隐藏'}</button><button class="add-machine ${currentTexts.has(word.text)?'added':''}" data-id="${escapeHtml(word.id)}">${currentTexts.has(word.text)?'✓ 已在机器中':`放入第 ${selectedSlot+1} 格`}</button></article>`).join('')+(shown.length>500?'<p class="empty">结果较多，请继续输入关键词缩小范围。</p>':'');
   restoreButton.hidden=getHiddenWordIds().length===0;
   renderDock();
 }
-filters.addEventListener('click',e=>{if(!e.target.dataset.cat)return;active=e.target.dataset.cat;filters.querySelector('.active')?.classList.remove('active');e.target.classList.add('active');render()});
+
+filters.addEventListener('click',event=>{const category=event.target.closest('[data-cat]')?.dataset.cat;if(!category)return;active=category;render()});
 input.addEventListener('input',render);
-list.addEventListener('click',e=>{const deleteId=e.target.closest('[data-delete]')?.dataset.delete;if(deleteId){const word=allWords().find(item=>item.id===deleteId);if(word?.source==='user')removeMyWord(deleteId);else if(word)hideBaseWord(deleteId);removeIngredient(deleteId);say('已从词仓移除。');render();return}const id=e.target.closest('[data-id]')?.dataset.id;if(!id)return;const current=getIngredients(),existing=current.some(word=>word.id===id);if(existing)removeIngredient(id);else{const result=addManualToMachine(current,allWords().find(word=>word.id===id));if(result.status==='limit')say('当前组合最多保留 8 个元素，请先删除一个再添加。');else setIngredients(result.items)}render()});
+list.addEventListener('click',event=>{
+  const deleteId=event.target.closest('[data-delete]')?.dataset.delete;
+  if(deleteId){const word=allWords().find(item=>item.id===deleteId);if(word?.source==='user')removeMyWord(deleteId);else if(word)hideBaseWord(deleteId);say('已从当前词仓视图移除。');render();return}
+  const id=event.target.closest('[data-id]')?.dataset.id;
+  const word=allWords().find(item=>item.id===id);
+  if(!word)return;
+  words=replaceSlot(words,selectedSlot,word);setElementDrop(words);say(`${word.text} 已放入第 ${selectedSlot+1} 格。`);selectedSlot=(selectedSlot+1)%DROP_SIZE;render();
+});
+document.querySelector('.dock-ingredients').addEventListener('click',event=>{const slot=event.target.closest('[data-slot]')?.dataset.slot;if(slot===undefined)return;selectedSlot=Number(slot);render()});
 restoreButton.addEventListener('click',()=>{restoreHiddenWords();render()});
-document.querySelector('.machine-dock').addEventListener('click',e=>{const id=e.target.closest('[data-remove]')?.dataset.remove;if(id)removeIngredient(id);if(e.target.closest('.clear-ingredients'))clearIngredients();render()});
+form.addEventListener('submit',event=>{
+  event.preventDefault();
+  const raw=form.querySelector('textarea').value;
+  const category=categorySelect.value;
+  const existing=new Set(allWords().map(word=>word.text));
+  const additions=[...new Set(raw.split(/[、，,\n]+/).map(text=>text.trim()).filter(Boolean))].filter(text=>!existing.has(text));
+  additions.reverse().forEach((text,index)=>addMyWord({id:`user_${Date.now()}_${index}`,text,category,subcategory:'personal',tags:['我的词语',text],source:'user',weight:1}));
+  form.reset();active='my-words';say(`已添加 ${additions.length} 个词。`);render();
+});
 render();

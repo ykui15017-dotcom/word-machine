@@ -1,4 +1,4 @@
-const KEYS={words:'wm-my-words-v1',saved:'wm-saved-v1',machine:'wm-machine-v1',ingredients:'wm-ingredients-v3',hiddenWords:'wm-hidden-words-v1'};
+const KEYS={words:'wm-my-words-v1',saved:'wm-saved-v1',machine:'wm-machine-v1',ingredients:'wm-ingredients-v3',hiddenWords:'wm-hidden-words-v1',drop:'wm-drop-v2'};
 const read=(key,fallback=[])=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const write=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
 const LEGACY_CATEGORY={living:'life',organic:'organic_matter',detail:'material',observation:'material',concept:'state'};
@@ -26,3 +26,14 @@ export const toggleIngredientLock=id=>{const ingredients=getIngredients().map(it
 export const clearRandomIngredients=()=>{const ingredients=getIngredients().filter(item=>item.source!=='random');setIngredients(ingredients);return ingredients};
 export const putOnMachine=word=>{sessionStorage.setItem('wm-incoming',JSON.stringify(word));location.href='./index.html'};
 export const takeIncoming=()=>{try{const x=JSON.parse(sessionStorage.getItem('wm-incoming'));sessionStorage.removeItem('wm-incoming');return x}catch{return null}};
+
+const normalizeDropWord=word=>word?{...migrateWord(word),source:word.source==='manual'?'manual':'random',locked:Boolean(word.locked||word.source==='manual')}:word;
+export const getElementDrop=()=>{
+  const current=read(KEYS.drop,null);
+  if(Array.isArray(current)&&current.length)return current.slice(0,5).map(normalizeDropWord);
+  const ingredients=getIngredients();
+  if(ingredients.length)return ingredients.slice(0,5).map(normalizeDropWord);
+  const legacy=getMachineState();
+  return Array.isArray(legacy?.words)?legacy.words.slice(0,5).map(normalizeDropWord):[];
+};
+export const setElementDrop=words=>write(KEYS.drop,words.slice(0,5).map(normalizeDropWord));
