@@ -1,195 +1,69 @@
-import {composeIngredients,normalizeIngredient,ROLE_LABELS,SCENE_ROLES} from './ingredient-composer.js';
-import {supplementMissing,replaceRandom,fullRandom,inspectMachine} from './machine-logic.js';
-import {saveDrop,setMachineState,getMachineState,getIngredients,setIngredients,setIngredientRole,toggleIngredientLock,clearRandomIngredients,removeIngredient,clearIngredients} from './storage.js';
+import {BASE_WORDS,CATEGORY_DISPLAY_LABELS as CATEGORY_LABELS} from '../data/words/index.js';
+import {getMyWords,getHiddenWordIds,getElementDrop,setElementDrop,saveDrop} from './storage.js';
+import {DROP_SIZE,uniquePool,freshDrop,replaceSlot,toggleLock,unlockAll,formatDrop} from './element-drop.js';
 import {initNav,escapeHtml} from './common.js';
-import {formatResultState,missingResultRoles} from './result-state.js';
-import {buildVisualDevelop} from './visual-develop.js';
 
 initNav();
-const idea=document.querySelector('.recipe-text');
-const message=document.querySelector('.aside-message');
-const resultState=document.querySelector('.result-state');
-const developPanel=document.querySelector('.develop-panel');
-const compositionDial=document.querySelector('.composition-dial');
-let variation=0;
-let hasResult=false;
-let messageTimer;
-let rolePopover;
+const slots=document.querySelector('.drop-slots');
+const line=document.querySelector('.drop-line');
+const picker=document.querySelector('.manual-picker');
+const pickerInput=picker.querySelector('input');
+const pickerResults=picker.querySelector('.picker-results');
+const pool=uniquePool(BASE_WORDS,getMyWords(),getHiddenWordIds());
+let words=getElementDrop();
+let selectedSlot=0;
+let toastTimer;
 
-function showVisualDirection(direction){
-  const moves=buildVisualDevelop(getIngredients())[direction];
-  const module=developPanel.querySelector('.visual-moves');
-  module.querySelector('.develop-prompts').innerHTML=moves.map((item,index)=>`<section><span>${String(index+1).padStart(2,'0')}</span><h4>${escapeHtml(item.name)}</h4><p>${escapeHtml(item.text)}</p></section>`).join('');
-  module.hidden=false;
-  developPanel.querySelectorAll('[data-visual-direction]').forEach(button=>button.setAttribute('aria-expanded',String(button.dataset.visualDirection===direction)));
-}
-function toggleMakeGuide(direction){
-  const target=developPanel.querySelector(`[data-make-guide="${direction}"]`),opening=target.hidden;
-  developPanel.querySelectorAll('[data-make-guide]').forEach(guide=>{guide.hidden=true});
-  developPanel.querySelectorAll('[data-make-direction]').forEach(button=>button.setAttribute('aria-expanded','false'));
-  if(opening){target.hidden=false;developPanel.querySelector(`[data-make-direction="${direction}"]`).setAttribute('aria-expanded','true')}
-}
+if(words.length!==DROP_SIZE){words=freshDrop(words,pool);setElementDrop(words)}
 
-function renderResultState(result){
-  const text=formatResultState(result);
-  if(result.status==='ok'||result.status==='conflict'){resultState.textContent=text;return}
-  const missing=missingResultRoles(result);
-  resultState.replaceChildren(document.createTextNode('还可以补充：'));
-  missing.forEach((item,index)=>{
-    if(index)resultState.append(document.createTextNode(' · '));
-    if(!item.description){resultState.append(document.createTextNode(item.label));return}
-    const link=document.createElement('a');
-    link.className='completion-link';link.href=`./word-bank.html?intent=${encodeURIComponent(item.role)}`;
-    link.textContent=item.label;link.dataset.tooltip=item.description;
-    link.setAttribute('aria-label',`${item.label}：${link.dataset.tooltip}`);
-    resultState.append(link);
-  });
+function say(text){const toast=document.querySelector('.toast');clearTimeout(toastTimer);toast.textContent=text;toast.classList.add('show');toastTimer=setTimeout(()=>toast.classList.remove('show'),2200)}
+function persist(){setElementDrop(words);render()}
+function render(){
+  slots.innerHTML=words.map((word,index)=>`<article class="drop-card ${word.locked?'is-locked':''}">
+    <span class="slot-number">0${index+1}</span>
+    <button class="lock-word" data-lock="${index}" aria-pressed="${word.locked}" aria-label="${word.locked?'解锁':'锁定'} ${escapeHtml(word.text)}">${word.locked?'● LOCKED':'○ LOCK'}</button>
+    <strong>${escapeHtml(word.text)}</strong>
+    <small>${escapeHtml(CATEGORY_LABELS[word.category]||word.category)}</small>
+    <button class="replace-word" data-replace="${index}">替换</button>
+  </article>`).join('');
+  line.textContent=formatDrop(words);
+}
+function openPicker(index=0){selectedSlot=index;picker.hidden=false;pickerInput.value='';renderPicker();picker.scrollIntoView({behavior:'smooth',block:'center'});pickerInput.focus()}
+function closePicker(){picker.hidden=true}
+function renderPicker(){
+  const query=pickerInput.value.trim().toLowerCase();
+  const shown=pool.filter(word=>!query||[word.text,word.category,...(word.tags||[])].join(' ').toLowerCase().includes(query)).slice(0,96);
+  pickerResults.innerHTML=shown.map(word=>`<button data-word="${escapeHtml(word.id)}"><span>${escapeHtml(word.text)}</span><small>${escapeHtml(CATEGORY_LABELS[word.category]||word.category)}</small></button>`).join('')||'<p class="empty">没有找到这个词，可以去词仓添加。</p>';
+}
+async function copyCurrent(){
+  const text=formatDrop(words);
+  try{await navigator.clipboard.writeText(text)}catch{const area=document.createElement('textarea');area.value=text;document.body.append(area);area.select();document.execCommand('copy');area.remove()}
+  say('已复制：'+text);
 }
 
-const ingredientKey=items=>items.map(item=>`${item.id}:${item.userRoleOverride||''}:${item.source||'manual'}:${Boolean(item.locked)}`).join('|');
-const savedState=getMachineState();
-if(savedState?.composerKey===ingredientKey(getIngredients())&&savedState.composedText){
-  idea.textContent=savedState.composedText;
-  variation=savedState.variation||0;
-  hasResult=true;
-  resultState.textContent='已恢复构想';
-}
-
-function ingredientCard(word,compact=false){
-  const normalized=normalizeIngredient(word);
-  const roleControl=compact?'':`<button class="role-trigger" data-role-trigger="${escapeHtml(word.id)}" aria-haspopup="menu" aria-expanded="false">${ROLE_LABELS[normalized.finalRole]}<span aria-hidden="true">▾</span></button>`;
-  const lockControl=compact?'':`<button class="ingredient-lock" data-lock="${escapeHtml(word.id)}" aria-label="${word.locked?'解锁':'锁定'} ${escapeHtml(word.text)}" aria-pressed="${Boolean(word.locked)}">${word.locked?'🔒':'♢'}</button>`;
-  return `<span class="ingredient ${compact?'compact':''}" data-source="${word.source}"><i class="category-${escapeHtml(word.category)}"></i><b>${escapeHtml(word.text)}</b>${roleControl}${lockControl}<button class="ingredient-remove" data-remove="${escapeHtml(word.id)}" aria-label="删除 ${escapeHtml(word.text)}">×</button></span>`;
-}
-function closeRolePopover(){
-  if(!rolePopover)return;
-  document.querySelector(`[data-role-trigger="${CSS.escape(rolePopover.dataset.wordId)}"]`)?.setAttribute('aria-expanded','false');
-  rolePopover.remove();rolePopover=null;
-}
-function openRolePopover(trigger){
-  closeRolePopover();
-  const word=getIngredients().find(item=>item.id===trigger.dataset.roleTrigger);
-  if(!word)return;
-  const selectedRole=normalizeIngredient(word).finalRole;
-  rolePopover=document.createElement('div');
-  rolePopover.className='role-popover';rolePopover.setAttribute('role','menu');rolePopover.dataset.wordId=word.id;
-  rolePopover.innerHTML=SCENE_ROLES.map(role=>`<button role="menuitemradio" aria-checked="${role===selectedRole}" data-role-choice="${role}">${ROLE_LABELS[role]}</button>`).join('');
-  document.body.append(rolePopover);
-  const rect=trigger.getBoundingClientRect();
-  rolePopover.style.left=`${Math.min(rect.left,window.innerWidth-rolePopover.offsetWidth-8)}px`;
-  rolePopover.style.top=`${rect.bottom+5}px`;
-  trigger.setAttribute('aria-expanded','true');
-  rolePopover.querySelector('[aria-checked="true"]')?.focus();
-}
-function refreshDraft(){
-  const ingredients=getIngredients();
-  if(!ingredients.length)return;
-  const result=composeIngredients(ingredients,variation);
-  idea.textContent=result.draftText||result.nextSuggestion;
-  renderResultState(result);
-  idea.dataset.status=result.status;
-  hasResult=Boolean(result.draftText);
-  setMachineState({composerKey:ingredientKey(ingredients),composedText:idea.textContent,variation,words:ingredients,status:result.status,warnings:result.warnings});
-}
-function renderTray(){
-  const ingredients=getIngredients();
-  document.querySelectorAll('.ingredient-tray').forEach((tray,index)=>{
-    tray.innerHTML=ingredients.length?ingredients.map(word=>ingredientCard(word,index>0)).join(''):(index>0?'<span class="tray-empty">还没有选择词语</span>':'');
-  });
-  if(!ingredients.length){hasResult=false;idea.textContent='从词库选择词语，再让它们在这里相遇。';resultState.textContent='等待词语'}
-  else refreshDraft();
-}
-function say(text){
-  clearTimeout(messageTimer);message.textContent=text;
-  messageTimer=setTimeout(()=>{if(message.textContent===text)message.textContent=''},2600);
-}
-function spinDial(){
-  compositionDial.classList.remove('is-spinning');
-  void compositionDial.offsetWidth;
-  compositionDial.classList.add('is-spinning');
-}
-function compose(isAnother=false){
-  const ingredients=getIngredients();
-  if(!ingredients.length){say('请先从词库添加词语。');return}
-  const structure=inspectMachine(ingredients);
-  if(!structure.hasSubject){say('还缺少主体，请先补入画面的主角。');return}
-  if(!structure.hasSupport){say('还缺少场域/容器或动作/路径。');return}
-  if(ingredients.length<3){say('当前少于 3 张词卡，建议先补足结构再生成完整视觉构想。');return}
-  variation=isAnother?variation+1:hasResult?variation+1:0;
-  idea.classList.remove('result-enter');void idea.offsetWidth;
-  const result=composeIngredients(ingredients,variation);
-  idea.textContent=result.draftText||result.nextSuggestion;
-  idea.classList.add('result-enter');hasResult=true;
-  renderResultState(result);
-  setMachineState({composerKey:ingredientKey(ingredients),composedText:idea.textContent,variation,words:ingredients,status:result.status,warnings:result.warnings});
-  say(isAnother?'表达已改写；原词保持不变。':'组合完成。');
-}
-
-document.addEventListener('click',event=>{
-  const changeOne=event.target.closest('[data-change-one]');
-  if(changeOne){
-    const options=developPanel.querySelector('.change-one-options');
-    const opening=options.hidden;
-    options.hidden=!opening;changeOne.setAttribute('aria-expanded',String(opening));
-    return;
-  }
-  const direction=event.target.closest('[data-visual-direction]');
-  if(direction){showVisualDirection(direction.dataset.visualDirection);return}
-  if(event.target.closest('[data-surprise-develop]')){const directions=['relation','scale','material','space','light','moment'];showVisualDirection(directions[Math.floor(Math.random()*directions.length)]);return}
-  const makeDirection=event.target.closest('[data-make-direction]');
-  if(makeDirection){toggleMakeGuide(makeDirection.dataset.makeDirection);return}
-  const roleChoice=event.target.closest('[data-role-choice]');
-  if(roleChoice){
-    const wordId=rolePopover?.dataset.wordId;
-    const role=roleChoice.dataset.roleChoice;
-    closeRolePopover();setIngredientRole(wordId,role);
-    variation=0;hasResult=false;renderTray();say(`已将词语设为${ROLE_LABELS[role]}。`);return;
-  }
-  const roleTrigger=event.target.closest('[data-role-trigger]');
-  if(roleTrigger){
-    if(rolePopover?.dataset.wordId===roleTrigger.dataset.roleTrigger)closeRolePopover();else openRolePopover(roleTrigger);
-    return;
-  }
-  closeRolePopover();
-  const remove=event.target.closest('[data-remove]');
-  if(remove){removeIngredient(remove.dataset.remove);hasResult=false;renderTray();say('已移除词语。');return}
+slots.addEventListener('click',event=>{
   const lock=event.target.closest('[data-lock]');
-  if(lock){toggleIngredientLock(lock.dataset.lock);renderTray();say('词卡锁定状态已更新。');return}
-  if(event.target.closest('.clear-ingredients')){clearIngredients();hasResult=false;renderTray();say('已清空词卡托盘。');return}
-  const control=event.target.closest('[data-action]');
-  const action=control?.dataset.action;
-  if(action==='supplement'){
-    const current=getIngredients();
-    const before=inspectMachine(current);
-    if(!before.missing.length){say('当前结构已完整。');return}
-    const supplemented=supplementMissing(current);
-    if(current.length>=5&&supplemented===current){say(`当前词卡已满，但结构仍缺少：${before.missing.map(item=>item.label).join(' / ')}。可删除或替换一个元素。`);return}
-    setIngredients(supplemented);
-    hasResult=false;renderTray();
-    const complete=inspectMachine(getIngredients()).missing.length===0;
-    say(complete?'当前组合结构已基本完整，可换随机词、继续展开，或保存灵感。':current.some(word=>word.source==='manual')?'已检测到手动选词，随机功能将只补足缺失类别。':'已补足当前缺失类别。');
-  }
-  if(action==='replace-random'){setIngredients(replaceRandom(getIngredients()));hasResult=false;renderTray();say('已替换随机词，手动词保持不变。')}
-  if(action==='full-random'){setIngredients(fullRandom(getIngredients()));hasResult=false;renderTray();say('已更新随机组；手动词保持不变。')}
-  if(action==='clear-random'){clearRandomIngredients();hasResult=false;renderTray();say('已清除随机词。')}
-  if(action==='compose'){spinDial();compose(false)}
-  if(action==='another'){spinDial();compose(true)}
-  if(action==='save'){
-    if(!hasResult){say('请先生成构想，再保存当前结果。');return}
-    const ingredients=getIngredients();saveDrop({words:ingredients,ingredients,recipe:idea.textContent,recipeId:'ingredient-composer'});say('灵感已保存，可在收藏页面查看。');
-  }
-  if(action==='develop'){
-    const opening=developPanel.hidden;
-    developPanel.hidden=!opening;control.setAttribute('aria-expanded',opening);
-    say(opening?'已展开当前视觉构想。':'已收起继续展开。');
-  }
+  const replace=event.target.closest('[data-replace]');
+  if(lock){words=toggleLock(words,Number(lock.dataset.lock));persist()}
+  if(replace)openPicker(Number(replace.dataset.replace));
 });
-document.addEventListener('keydown',event=>{
-  if(event.key==='Escape'&&rolePopover){
-    const wordId=rolePopover.dataset.wordId;
-    closeRolePopover();document.querySelector(`[data-role-trigger="${CSS.escape(wordId)}"]`)?.focus();
+document.querySelector('.drop-controls').addEventListener('click',event=>{
+  const action=event.target.closest('[data-action]')?.dataset.action;
+  if(action==='new'){
+    if(words.every(word=>word.locked)){say('五个词都已锁定，请先解锁一个。');return}
+    words=freshDrop(words,pool);persist();say('新的五个元素已经掉落。');
   }
+  if(action==='manual')openPicker(words.findIndex(word=>!word.locked)>=0?words.findIndex(word=>!word.locked):0);
+  if(action==='copy')copyCurrent();
+  if(action==='save'){saveDrop({words:words.map(word=>({...word})),format:'elements-v2'});say('已保存这组词。')}
 });
-window.addEventListener('resize',closeRolePopover);
-window.addEventListener('scroll',closeRolePopover,true);
-renderTray();
+document.querySelector('[data-action="unlock"]').addEventListener('click',()=>{words=unlockAll(words);persist();say('五个词已全部解锁。')});
+picker.querySelector('.picker-close').addEventListener('click',closePicker);
+pickerInput.addEventListener('input',renderPicker);
+pickerResults.addEventListener('click',event=>{
+  const id=event.target.closest('[data-word]')?.dataset.word;
+  const word=pool.find(item=>item.id===id);
+  if(!word)return;
+  words=replaceSlot(words,selectedSlot,word);persist();closePicker();say(`${word.text} 已放入第 ${selectedSlot+1} 格。`);
+});
+render();

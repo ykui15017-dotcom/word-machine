@@ -1,4 +1,22 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Word Machine visual archive"><title>Word Bank — Word Machine</title><link rel="stylesheet" href="./css/styles.css"></head>
-<body><header class="site-header"><a class="brand" href="./index.html">WORD MACHINE</a><button class="menu-button" aria-expanded="false" aria-label="打开导航">MENU</button><nav class="nav-links" aria-label="主要导航"><a href="./index.html">MACHINE</a><a href="./word-bank.html" aria-current="page">WORD BANK</a><a href="./observations.html">OBSERVATIONS</a><a href="./saved.html">SAVED</a></nav></header>
-<main class="archive-main archive-main-wide"><section class="archive-content"><label class="search-wrap"><span aria-hidden="true">⌕</span><input class="search" type="search" placeholder="Search words, tags, categories..." aria-label="搜索词仓"></label><p class="browse-label">BROWSE BY TAG</p><div class="filter-tools"><div class="filters" role="group" aria-label="分类筛选"></div><button class="restore-hidden" hidden>RESTORE HIDDEN WORDS</button></div><aside class="intent-guide" hidden></aside><div class="archive-rule"><strong>INDEX</strong><span class="bank-count"></span></div><div class="word-list"></div></section><section class="machine-dock"><header><h2>IN THE MACHINE</h2><span>已放入工作台的元素</span></header><div class="dock-body"><div class="dock-ingredients"></div><div class="dock-actions"><button class="clear-ingredients">CLEAR ALL</button><a href="./index.html">GO TO COMPOSER →</a></div></div></section></main><footer class="site-footer">WORD MACHINE · visual archive · <span class="year"></span></footer><div class="toast" role="status" aria-live="polite"></div><script type="module" src="./js/wordbank.js"></script></body></html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="独立视觉元素词仓"><title>Word Bank — Word Machine</title><link rel="stylesheet" href="./css/styles.css"><link rel="stylesheet" href="./css/word-machine-v2.css"></head>
+<body>
+<header class="site-header"><a class="brand" href="./index.html">WORD MACHINE</a><button class="menu-button" aria-expanded="false" aria-label="打开导航">MENU</button><nav class="nav-links" aria-label="主要导航"><a href="./index.html">MACHINE</a><a href="./word-bank.html" aria-current="page">WORD BANK</a><a href="./saved.html">SAVED</a></nav></header>
+<main class="archive-main archive-main-wide bank-v2">
+  <header class="bank-intro"><span class="folio">ATOMIC VISUAL ELEMENTS</span><h1>WORD BANK</h1><p>这里保存的是独立词语，不是已经完成的联想。</p></header>
+  <section class="my-word-panel" id="my-words" aria-labelledby="my-words-title">
+    <header><div><span class="folio">PERSONAL COLLECTION</span><h2 id="my-words-title">MY WORDS</h2></div><p>原来的 OBSERVATIONS 已并入这里。</p></header>
+    <form class="my-word-form"><textarea maxlength="3000" placeholder="鱼缸、药片、红线、涟漪、潮湿" aria-label="添加自己的词语" required></textarea><div><select aria-label="选择分类"></select><button type="submit">ADD WORDS</button></div><small>可以用“、”、逗号或换行一次添加多个词。</small></form>
+  </section>
+  <section class="archive-content">
+    <label class="search-wrap"><span aria-hidden="true">⌕</span><input class="search" type="search" placeholder="搜索词语或分类……" aria-label="搜索词仓"></label>
+    <p class="browse-label">BROWSE BY CATEGORY</p>
+    <div class="filter-tools"><div class="filters" role="group" aria-label="分类筛选"></div><button class="restore-hidden" hidden>恢复隐藏词语</button></div>
+    <div class="archive-rule"><strong>INDEX</strong><span class="bank-count"></span></div>
+    <div class="word-list"></div>
+  </section>
+  <section class="machine-dock" aria-labelledby="dock-title"><header><div><h2 id="dock-title">IN THE MACHINE</h2><span>先选择一个位置，再从词仓放入词语</span></div><a href="./index.html">返回机器 →</a></header><div class="dock-ingredients"></div></section>
+</main>
+<footer class="site-footer">WORD MACHINE · atomic visual archive · <span class="year"></span></footer><div class="toast" role="status" aria-live="polite"></div><script type="module" src="./js/wordbank.js"></script>
+</body></html>
