@@ -1,0 +1,17 @@
+.drop-slots{
+  align-items:stretch;
+}
+
+.drop-card,
+.drop-card:nth-child(odd),
+.drop-card:nth-child(even){
+  transform:none;
+  border-radius:3px;
+}
+
+.drop-card strong{
+  min-height:2.9em;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
