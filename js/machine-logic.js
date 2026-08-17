@@ -15,23 +15,26 @@ const roleOf=word=>normalizeIngredient(word).finalRole;
 const slotFor=word=>STRUCTURE.find(slot=>slot.roles.includes(roleOf(word)));
 const pick=(items,rng)=>items.length?items[Math.min(items.length-1,Math.floor(rng()*items.length))]:null;
 const withoutUsedText=(items,current)=>{const texts=new Set(current.map(word=>word.text));return items.filter(word=>!texts.has(word.text))};
-const randomFor=(slot,current,rng)=>{
-  return pick(withoutUsedText(candidatesForRoles(slot.roles),current),rng);
-};
+const randomFor=(slot,current,rng)=>pick(withoutUsedText(candidatesForRoles(slot.roles),current),rng);
 const randomForMissing=(missing,current,rng)=>{
-  const roles=missing.role==='support'?['setting','container']:[missing.role];
+  const roles=missing.role==='support'?['setting','container']
+    :missing.role==='target'?['subject']
+    :missing.role==='relation'?['relation']
+    :[missing.role];
   return pick(withoutUsedText(candidatesForRoles(roles),current),rng);
 };
 const asRandom=word=>({...word,source:'random',locked:false});
 
 export function inspectMachine(items=[]){
   const occupied=new Set(items.map(slotFor).filter(Boolean).map(slot=>slot.id));
-  const missing=missingResultRoles(composeIngredients(items));
-  return {hasSubject:occupied.has('subject'),hasSupport:occupied.has('place')||occupied.has('entry')||occupied.has('action'),missing,full:items.length>=MACHINE_LIMIT,complete:missing.length===0};
+  const composition=composeIngredients(items);
+  const missing=missingResultRoles(composition);
+  const hasRelationalSupport=composition.grammarType==='relation-target'||composition.grammarType==='relation-open';
+  return {hasSubject:occupied.has('subject'),hasSupport:hasRelationalSupport||occupied.has('place')||occupied.has('entry')||occupied.has('action'),missing,full:items.length>=MACHINE_LIMIT,complete:missing.length===0};
 }
 export function supplementMissing(items=[],rng=Math.random,maxAdd=2){
   const result=items.slice(),status=inspectMachine(result);
-  const targets=status.missing.filter(item=>item.role==='support'||STRUCTURE.some(slot=>slot.roles.includes(item.role)));
+  const targets=status.missing.filter(item=>item.role==='support'||item.role==='target'||item.role==='relation'||STRUCTURE.some(slot=>slot.roles.includes(item.role)));
   if(status.full){
     const redundant=findRedundantRandomIndex(result);
     if(redundant<0||!targets.length)return items;
