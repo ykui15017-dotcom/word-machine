@@ -15,3 +15,38 @@
   align-items:center;
   justify-content:center;
 }
+
+.card-actions{
+  margin-top:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+}
+
+.card-actions .replace-word,
+.card-actions .remove-word{
+  margin:0;
+  padding:2px 3px;
+  border:0;
+  border-bottom:1px dotted #77776f;
+  background:none;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.2;
+  cursor:pointer;
+}
+
+.card-actions .remove-word{
+  border-bottom-color:transparent;
+  opacity:.72;
+}
+
+.card-actions .replace-word:hover,
+.card-actions .replace-word:focus-visible,
+.card-actions .remove-word:hover,
+.card-actions .remove-word:focus-visible{
+  color:var(--red);
+  border-bottom-color:var(--red);
+  outline:0;
+}
