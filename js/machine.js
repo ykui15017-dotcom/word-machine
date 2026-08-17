@@ -30,7 +30,7 @@ function say(text){const toast=document.querySelector('.toast');clearTimeout(toa
 function renderPersonal(){
   const personal=getMyWords().slice(0,12);
   myWordChips.innerHTML=personal.length
-    ?personal.map(word=>`<span class="my-word-chip"><b>${escapeHtml(word.text)}</b><small>${escapeHtml(categoryLabel(word.category))}</small></span>`).join('')
+    ?personal.map(word=>`<span class="my-word-chip"><b>${escapeHtml(word.text)}</b></span>`).join('')
     :'<p class="desk-empty">还没有自己的词。想到一个，就从左边留下来。</p>';
 }
 function render(){
