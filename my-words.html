@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="个人视觉元素词"><title>My Words — Word Machine</title><link rel="stylesheet" href="./css/styles.css"><link rel="stylesheet" href="./css/word-machine-v2.css"></head>
+<body>
+<header class="site-header"><a class="brand" href="./index.html">WORD MACHINE</a><button class="menu-button" aria-expanded="false" aria-label="打开导航">MENU</button><nav class="nav-links" aria-label="主要导航"><a href="./index.html">MACHINE</a><a href="./word-bank.html">WORD BANK</a><a href="./my-words.html" aria-current="page">MY WORDS</a><a href="./saved.html">SAVED</a></nav></header>
+<main class="archive-main archive-main-wide bank-v2 my-words-page">
+  <header class="bank-intro"><span class="folio">PERSONAL COLLECTION</span><h1>MY WORDS</h1><p>这里只保存你自己加入的元素词。</p></header>
+  <section class="my-word-panel" aria-labelledby="add-my-words-title">
+    <header><div><span class="folio">ADD YOUR WORDS</span><h2 id="add-my-words-title">把想到的词留下来。</h2></div></header>
+    <form class="my-word-form"><textarea maxlength="3000" placeholder="鱼缸、药片、红线、涟漪、潮湿" aria-label="添加自己的词语" required></textarea><div><select aria-label="选择分类"></select><button type="submit">ADD WORDS</button></div><small>可以用“、”、逗号或换行一次添加多个词。</small></form>
+  </section>
+  <section class="archive-content">
+    <div class="archive-rule"><strong>YOUR WORDS</strong><span class="bank-count my-word-count"></span></div>
+    <div class="word-list my-word-list"></div>
+  </section>
+</main>
+<footer class="site-footer">WORD MACHINE · personal collection · <span class="year"></span></footer><div class="toast" role="status" aria-live="polite"></div><script type="module" src="./js/my-words.js"></script>
+</body></html>
