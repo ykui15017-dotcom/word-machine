@@ -1,0 +1,19 @@
+@import url("https://fonts.googleapis.com/css2?family=Henny+Penny&display=swap");
+
+.hero-wordmark{
+  display:block;
+  padding:0 12px 2px;
+}
+.hero-wordmark::after{
+  display:none;
+}
+.hero-wordmark strong{
+  display:block;
+  font:400 clamp(36px,4.2vw,43px)/1.08 "Henny Penny",serif;
+  letter-spacing:.035em;
+  white-space:nowrap;
+}
+@media(max-width:460px){
+  .hero-wordmark{padding-inline:6px}
+  .hero-wordmark strong{font-size:29px;letter-spacing:.025em}
+}
