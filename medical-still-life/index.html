@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="透明玻璃鱼缸与药品泡罩的程序化 Three.js 静物研究">
+  <title>GLASS / 01 — Three.js 静物研究</title>
+  <link rel="stylesheet" href="../css/scene.css">
+</head>
+<body>
+  <main class="app-shell">
+    <div class="viewport" id="viewport" aria-label="可交互三维静物场景"></div>
+    <div class="reference-pane" id="referencePane" hidden>
+      <div class="reference-study" role="img" aria-label="参考图构图分析：玻璃鱼缸位于白桌中央偏左，左侧纱帘，上方大面积留白">
+        <div class="study-curtain"></div><div class="study-table"></div><div class="study-bowl"></div><div class="study-pills"></div>
+      </div>
+      <p>REFERENCE · COMPOSITION STUDY</p>
+    </div>
+
+    <header class="masthead">
+      <a class="wordmark" href="../" aria-label="返回 Word Machine 首页">GLASS <i>/</i> 01</a>
+      <p>PROCEDURAL STILL LIFE<br>THREE.JS STUDY</p>
+    </header>
+
+    <aside class="scene-note">
+      <span>01</span>
+      <p>玻璃、银箔与粉质白<br>一组冷光下的医疗静物</p>
+    </aside>
+
+    <section class="controls" aria-label="场景控制">
+      <div class="mode-switch" role="group" aria-label="显示模式">
+        <button data-mode="render" class="active">三维渲染</button>
+        <button data-mode="split">并排对照</button>
+        <button data-mode="reference">参考分析</button>
+      </div>
+      <div class="action-row">
+        <button id="resetView" class="icon-button"><span>↙</span> 恢复参考视角</button>
+        <label class="toggle"><input type="checkbox" id="autoRotate"><span></span>缓慢旋转</label>
+      </div>
+    </section>
+
+    <footer class="status-bar">
+      <p><b>DRAG</b> 旋转 <b>SCROLL</b> 缩放</p>
+      <p id="qualityStatus">STRUCTURE · MATERIAL · LIGHT · MATCH <span>✓</span></p>
+    </footer>
+    <div class="loading" id="loading"><span></span><p>BUILDING THE STUDY</p></div>
+  </main>
+  <script type="module" src="../js/scene.js"></script>
+</body>
+</html>

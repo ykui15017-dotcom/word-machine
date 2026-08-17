@@ -93,3 +93,29 @@ python3 -m http.server 8000
 ## 数据与隐私
 
 没有账户、后端、分析脚本或 AI API。`wm-my-words-v1`、`wm-saved-v1` 和 `wm-machine-v1` 存在当前浏览器本地；清理站点数据会删除它们。
+
+---
+
+## Three.js 医疗静物研究
+
+独立页面 [`medical-still-life/index.html`](./medical-still-life/index.html) 是一个可实时浏览的程序化 Three.js 医疗静物场景。它保留 Word Machine 首页与原有工具，同时增加厚壁玻璃鱼缸、不规则银色药品泡罩、粉质药片、旧白木桌、纱帘和冷灰蓝墙面的三维研究。
+
+### 预览与交互
+
+使用上方相同的本地 HTTP 服务器，然后打开：
+
+```text
+http://localhost:8000/medical-still-life/
+```
+
+首次加载需要连接 CDN 获取 Three.js ES modules。拖动旋转，滚轮缩放；页面可恢复参考机位、启用缓慢旋转，并切换三维、构图分析与并排模式。项目使用相对路径，也可随主站直接发布到 GitHub Pages。
+
+### img2threejs 工作流与推断
+
+1. **Structure** — 从参考图提取旋转对称轮廓，以 `LatheGeometry` 重建开口球形缸体。
+2. **Proportion** — 锁定参考构图、鱼缸和桌面的尺度，再加入墙面与纱帘。
+3. **Material** — 分离缸体、双层卷口和厚底；玻璃配置 transmission、IOR、thickness 和 attenuation，泡罩由金属薄板与独立凸起组成。
+4. **Light** — 使用左侧冷白面积光和柔和补光，控制玻璃边缘高光与低对比阴影。
+5. **Match** — 默认使用 26° 视场（约 70mm 全画幅等效）的参考机位，并提供构图分析对照。
+
+目标仓库 `https://github.com/img2threejs/img2threejs.git` 在当前执行环境中被网络代理以 HTTP 403 拒绝，无法写入其包文件；实现仍依照指定的阶段质量流程。单图不可见的鱼缸背面依据旋转对称性推断，桌子画面外结构依据常规抽屉桌结构推断；纱帘则以多层细分平面作轻量实时近似，而非布料仿真。
