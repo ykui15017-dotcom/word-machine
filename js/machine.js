@@ -1,6 +1,7 @@
-import {BASE_WORDS,CATEGORIES,CATEGORY_DISPLAY_LABELS as CATEGORY_LABELS} from '../data/words/index.js';
-import {getMyWords,addMyWord,getHiddenWordIds,getElementDrop,setElementDrop,saveDrop} from './storage.js';
+import {BASE_WORDS,CATEGORY_DISPLAY_LABELS as CATEGORY_LABELS} from '../data/words/index.js';
+import {getMyWords,getHiddenWordIds,getElementDrop,setElementDrop,saveDrop,getDoodle,setDoodle,getDoodleHistory,setDoodleHistory} from './storage.js';
 import {DROP_SIZE,uniquePool,freshDrop,replaceSlot,toggleLock,unlockAll,formatDrop} from './element-drop.js';
+import {createDoodle,doodleSvg} from './doodle-card.js';
 import {initNav,escapeHtml} from './common.js';
 
 initNav();
@@ -9,29 +10,28 @@ const line=document.querySelector('.drop-line');
 const picker=document.querySelector('.manual-picker');
 const pickerInput=picker.querySelector('input');
 const pickerResults=picker.querySelector('.picker-results');
-const quickForm=document.querySelector('.quick-word-form');
-const quickInput=quickForm.querySelector('input');
-const quickCategory=quickForm.querySelector('select');
-const myWordChips=document.querySelector('.my-word-chips');
+const doodlePaper=document.querySelector('.doodle-paper');
 let words=getElementDrop();
+let doodle=getDoodle();
 let selectedSlot=0;
 let toastTimer;
 
 const currentPool=()=>uniquePool(BASE_WORDS,getMyWords(),getHiddenWordIds());
 const categoryLabel=category=>CATEGORY_LABELS[category]||category;
-quickCategory.innerHTML=CATEGORIES.map(category=>`<option value="${category}">${escapeHtml(categoryLabel(category))}</option>`).join('');
 
 if(words.length!==DROP_SIZE){
-  words=freshDrop(words,currentPool());
+  const previous=words.map(word=>({...word}));
+  words=freshDrop(previous.map(word=>({...word,locked:true})),currentPool()).map((word,index)=>index<previous.length?{...word,locked:previous[index].locked}:word);
   setElementDrop(words);
 }
 
 function say(text){const toast=document.querySelector('.toast');clearTimeout(toastTimer);toast.textContent=text;toast.classList.add('show');toastTimer=setTimeout(()=>toast.classList.remove('show'),2200)}
-function renderPersonal(){
-  const personal=getMyWords().slice(0,12);
-  myWordChips.innerHTML=personal.length
-    ?personal.map(word=>`<span class="my-word-chip"><b>${escapeHtml(word.text)}</b></span>`).join('')
-    :'<p class="desk-empty">还没有自己的词。想到一个，就从左边留下来。</p>';
+const sameDoodleWords=()=>doodle?.words?.join('\u0000')===words.map(word=>word.text).join('\u0000');
+function refreshDoodle(){
+  const history=getDoodleHistory();
+  doodle=createDoodle(words,history);
+  setDoodle(doodle);
+  setDoodleHistory([doodle.signature,...history.filter(signature=>signature!==doodle.signature)]);
 }
 function render(){
   slots.innerHTML=words.map((word,index)=>`<article class="drop-card ${word.locked?'is-locked':''}">
@@ -42,9 +42,10 @@ function render(){
     <button class="replace-word" data-replace="${index}">替换</button>
   </article>`).join('');
   line.textContent=formatDrop(words);
-  renderPersonal();
+  if(!sameDoodleWords())refreshDoodle();
+  doodlePaper.innerHTML=doodleSvg(doodle,words);
 }
-function persist(){setElementDrop(words);render()}
+function persist(refresh=false){setElementDrop(words);if(refresh)refreshDoodle();render()}
 function openPicker(index=0){selectedSlot=index;picker.hidden=false;pickerInput.value='';renderPicker();picker.scrollIntoView({behavior:'smooth',block:'center'});pickerInput.focus()}
 function closePicker(){picker.hidden=true}
 function renderPicker(){
@@ -67,41 +68,20 @@ slots.addEventListener('click',event=>{
 document.querySelector('.drop-controls').addEventListener('click',event=>{
   const action=event.target.closest('[data-action]')?.dataset.action;
   if(action==='new'){
-    if(words.every(word=>word.locked)){say('五个词都已锁定，请先解锁一个。');return}
-    words=freshDrop(words,currentPool());persist();say('新的五个元素已经掉落。');
+    if(words.every(word=>word.locked)){say('七个词都已锁定，请先解锁一个。');return}
+    words=freshDrop(words,currentPool());persist(true);say('新的七个元素已经掉落。');
   }
   if(action==='manual')openPicker(words.findIndex(word=>!word.locked)>=0?words.findIndex(word=>!word.locked):0);
   if(action==='copy')copyCurrent();
-  if(action==='save'){saveDrop({words:words.map(word=>({...word})),format:'elements-v2'});say('已保存这组词。')}
+  if(action==='save'){saveDrop({words:words.map(word=>({...word})),doodle:{...doodle},format:'elements-v2'});say('已保存这组词。')}
 });
-document.querySelector('[data-action="unlock"]').addEventListener('click',()=>{words=unlockAll(words);persist();say('五个词已全部解锁。')});
+document.querySelector('[data-action="unlock"]').addEventListener('click',()=>{words=unlockAll(words);persist();say('七个词已全部解锁。')});
 picker.querySelector('.picker-close').addEventListener('click',closePicker);
 pickerInput.addEventListener('input',renderPicker);
 pickerResults.addEventListener('click',event=>{
   const id=event.target.closest('[data-word]')?.dataset.word;
   const word=currentPool().find(item=>item.id===id);
   if(!word)return;
-  words=replaceSlot(words,selectedSlot,word);persist();closePicker();say(`${word.text} 已放入第 ${selectedSlot+1} 格。`);
-});
-quickForm.addEventListener('submit',event=>{
-  event.preventDefault();
-  const category=quickCategory.value;
-  const raw=quickInput.value;
-  const existing=new Set([...BASE_WORDS,...getMyWords()].map(word=>word.text));
-  const additions=[...new Set(raw.split(/[、，,]+/).map(text=>text.trim()).filter(Boolean))].filter(text=>!existing.has(text));
-  if(!additions.length){say('这些词已经在词仓里了。');return}
-  additions.slice().reverse().forEach((text,index)=>addMyWord({
-    id:`user_${Date.now()}_${index}`,
-    text,
-    category,
-    subcategory:'personal',
-    tags:['我的词语',text],
-    source:'user',
-    weight:1
-  }));
-  quickForm.reset();
-  renderPersonal();
-  if(!picker.hidden)renderPicker();
-  say(additions.length===1?`${additions[0]} 已加入 MY WORDS。`:`已加入 ${additions.length} 个词。`);
+  words=replaceSlot(words,selectedSlot,word);persist(true);closePicker();say(`${word.text} 已放入第 ${selectedSlot+1} 格。`);
 });
 render();

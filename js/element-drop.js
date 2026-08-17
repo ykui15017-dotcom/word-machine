@@ -1,4 +1,4 @@
-export const DROP_SIZE=5;
+export const DROP_SIZE=7;
 export const DROP_GROUPS=[['object','container'],['life','organic_matter'],['material'],['action','state','relation'],['space','visual','scale']];
 const randomIndex=(length,rng)=>Math.min(length-1,Math.floor(rng()*length));
 const shuffle=(items,rng)=>{const copy=items.slice();for(let i=copy.length-1;i>0;i--){const j=randomIndex(i+1,rng);[copy[i],copy[j]]=[copy[j],copy[i]]}return copy};

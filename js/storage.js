@@ -1,4 +1,4 @@
-const KEYS={words:'wm-my-words-v1',saved:'wm-saved-v1',machine:'wm-machine-v1',ingredients:'wm-ingredients-v3',hiddenWords:'wm-hidden-words-v1',drop:'wm-drop-v2'};
+const KEYS={words:'wm-my-words-v1',saved:'wm-saved-v1',machine:'wm-machine-v1',ingredients:'wm-ingredients-v3',hiddenWords:'wm-hidden-words-v1',drop:'wm-drop-v2',doodle:'wm-doodle-v1',doodleHistory:'wm-doodle-history-v1'};
 const read=(key,fallback=[])=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const write=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
 const LEGACY_CATEGORY={living:'life',organic:'organic_matter',detail:'material',observation:'material',concept:'state'};
@@ -30,10 +30,14 @@ export const takeIncoming=()=>{try{const x=JSON.parse(sessionStorage.getItem('wm
 const normalizeDropWord=word=>word?{...migrateWord(word),source:word.source==='manual'?'manual':'random',locked:Boolean(word.locked||word.source==='manual')}:word;
 export const getElementDrop=()=>{
   const current=read(KEYS.drop,null);
-  if(Array.isArray(current)&&current.length)return current.slice(0,5).map(normalizeDropWord);
+  if(Array.isArray(current)&&current.length)return current.slice(0,7).map(normalizeDropWord);
   const ingredients=getIngredients();
-  if(ingredients.length)return ingredients.slice(0,5).map(normalizeDropWord);
+  if(ingredients.length)return ingredients.slice(0,7).map(normalizeDropWord);
   const legacy=getMachineState();
-  return Array.isArray(legacy?.words)?legacy.words.slice(0,5).map(normalizeDropWord):[];
+  return Array.isArray(legacy?.words)?legacy.words.slice(0,7).map(normalizeDropWord):[];
 };
-export const setElementDrop=words=>write(KEYS.drop,words.slice(0,5).map(normalizeDropWord));
+export const setElementDrop=words=>write(KEYS.drop,words.slice(0,7).map(normalizeDropWord));
+export const getDoodle=()=>read(KEYS.doodle,null);
+export const setDoodle=doodle=>write(KEYS.doodle,doodle);
+export const getDoodleHistory=()=>read(KEYS.doodleHistory).filter(value=>typeof value==='string').slice(0,20);
+export const setDoodleHistory=history=>write(KEYS.doodleHistory,history.slice(0,20));

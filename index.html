@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="随机掉落五个独立视觉元素词">
+  <meta name="description" content="随机掉落七个独立视觉元素词">
   <title>Machine — Word Machine</title>
   <link rel="stylesheet" href="./css/styles.css">
   <link rel="stylesheet" href="./css/word-machine-v2.css">
@@ -23,7 +23,7 @@
   <section class="drop-machine" aria-labelledby="drop-title">
     <header class="machine-heading"><div><span class="machine-light" aria-hidden="true"></span><h2 id="drop-title">TODAY'S DROP</h2></div><button class="unlock-all" data-action="unlock">全部解锁</button></header>
     <div class="drop-slots" aria-live="polite"></div>
-    <p class="drop-line" aria-label="当前五个词"></p>
+    <p class="drop-line" aria-label="当前七个词"></p>
     <div class="drop-controls">
       <button class="primary-control" data-action="new">NEW DROP</button>
       <button data-action="manual">手动挑选</button>
@@ -39,30 +39,12 @@
     <a class="picker-bank-link" href="./word-bank.html">进入完整词仓 →</a>
   </section>
 
-  <section class="personal-desk" aria-labelledby="personal-desk-title">
-    <header class="desk-heading">
-      <span class="folio">PERSONAL DESK</span>
-      <h2 id="personal-desk-title">把想到的词留下来。</h2>
-      <p>这里不替你扩写，只保存你自己的视觉元素。</p>
-    </header>
-    <div class="desk-grid">
-      <section class="quick-word-block" aria-labelledby="quick-word-title">
-        <header><h3 id="quick-word-title">ADD YOUR WORD</h3><span>QUICK ADD</span></header>
-        <form class="quick-word-form">
-          <label><span class="sr-only">输入自己的词语</span><input type="text" maxlength="120" placeholder="例如：胶痕、湿纸箱" required></label>
-          <select aria-label="选择词语分类"></select>
-          <button type="submit">+ ADD</button>
-        </form>
-        <p>可以用“、”或逗号一次添加多个词。添加后会进入 MY WORDS，也会参与之后的随机掉落。</p>
-      </section>
-      <section class="my-words-preview" aria-labelledby="my-words-preview-title">
-        <header><h3 id="my-words-preview-title">MY WORDS</h3><a href="./my-words.html">VIEW ALL →</a></header>
-        <div class="my-word-chips" aria-live="polite"></div>
-      </section>
-    </div>
+  <section class="visual-note" aria-labelledby="visual-note-title">
+    <header><span class="folio">RULE-BASED SKETCH</span><h2 id="visual-note-title">VISUAL NOTE</h2></header>
+    <div class="doodle-paper" aria-live="polite"></div>
   </section>
 </main>
-<footer class="site-footer">WORD MACHINE · five loose elements · <span class="year"></span></footer>
+<footer class="site-footer">WORD MACHINE · seven loose elements · <span class="year"></span></footer>
 <div class="toast" role="status" aria-live="polite"></div>
 <script type="module" src="./js/machine.js"></script>
 </body>
